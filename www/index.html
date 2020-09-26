@@ -1,0 +1,73 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Universal Hamradio Remote by F4HTB</title>
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<script src="controls.js"></script>
+	</head>
+	</head>
+	<body onload="bodyload();">
+	
+		<a href="#fermer" id="ombre-body"></a>
+		<div id="pop-upspinner"> 
+                <img alt="" src="img/spinner.gif"> 
+				<p  id="socketsate"><center>Wait For connection....</center></p>
+        </div>
+	
+		<div id="div-princ">
+			<img onclick="powertogle();" id="button_power" src="img/poweroff.png">
+		
+		
+			<div id="div-freq">
+				<ul id="freq_but">
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="cmhz" v=100000000>▲</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="dmhz" v=10000000>▲</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="umhz" v=1000000>▲</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();"> </li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="ckhz" v=100000>▲</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="dkhz" v=10000>▲</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="ukhz" v=1000>▲</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();"> </li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="chz" v=100>▲</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="dhz" v=10>▲</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="uhz" v=1>▲</li>
+				</ul>
+				<ul id="freq_disp" onwheel="freq_digit_scroll()">
+				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="cmhz" v=100000000>0</li>
+				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="dmhz" v=10000000>0</li>
+				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="umhz" v=1000000>0</li>
+				  <li class="freq_digit">.</li>
+				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="ckhz" v=100000>0</li>
+				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="dkhz" v=10000>0</li>
+				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="ukhz" v=1000>0</li>
+				  <li class="freq_digit">.</li>
+				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="chz" v=100>0</li>
+				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="dhz" v=10>0</li>
+				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="uhz" v=1>0</li>
+				</ul>
+				<ul id="freq_but">
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="cmhz" v=-100000000>▼</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="dmhz" v=-10000000>▼</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="umhz" v=-1000000>▼</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();"> </li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="ckhz" v=-100000>▼</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="dkhz" v=-10000>▼</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="ukhz" v=-1000>▼</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" > </li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="chz" v=-100>▼</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="dhz" v=-10>▼</li>
+				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="uhz" v=-1>▼</li>
+				</ul>
+			</div>
+			
+			<div id="div-scoketscontrols">
+				<p id="indcwsTX"><img src="img/critsred.png">wsTX</p>
+				<p id="indwsAudioRX"><img src="img/critsred.png">wsRX</p>
+				<p id="indwsControlTRX"><img src="img/critsred.png">wsCtrl</p>
+				<p id="indcwsFFT"><img src="img/critsred.png">wsFFT</p>
+			</div>
+			<div id="div-latencymeter">latency:∞</div>
+			
+		</div>	
+	</body>
+</html>

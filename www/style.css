@@ -1,0 +1,178 @@
+body {
+	color: white;
+	font:normal bold 14px tahoma;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+#ombre-body{
+display: none;
+position: absolute;
+left: 0;
+top: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.7);
+z-index: 1000;
+cursor: default;
+}
+
+#pop-upspinner{
+display: none;
+position: fixed;
+left: calc(50% - 100px);
+top: 50%;
+z-index: 2000;
+cursor: default;
+overflow: hidden;
+}
+
+#div-princ {
+	margin: 20px auto;
+	width: 1800px;
+	height: 860px; 
+	background-color:#171717;
+	box-shadow:5px 5px 5px 5px rgba(0, 0, 0, 0.5),0px 0px 0px 0px rgba(255, 255, 255, 0.5) inset;
+	border-radius: 30px 30px 30px 30px ;
+	position:relative
+}
+
+#button_power
+{
+	position:absolute;
+	left:100px;
+	top:100px;
+	width:100px;
+	height:100px; 
+}
+
+.button_mode{
+	width:60px;
+	height: 40px; 			
+}
+
+.button_pressed{
+	box-shadow:0px 2px 2px 0px rgba(0, 0, 0, 0.5) inset,0px 2px 2px 0px rgba(255, 255, 255, 0.5);	
+}
+
+.button_unpressed{
+	box-shadow:0px 2px 2px 0px rgba(0, 0, 0, 0.5),0px 2px 2px 0px rgba(255, 255, 255, 0.5) inset;		
+}
+
+.button_white{
+    color: #e0e0e0;
+    background: #a5cd4e;
+}
+
+.button_green {
+    color: #7FFF00;
+	text-shadow: 0 0 10px #6a6767, 0 0 20px #444, 0 0 30px #515151, 0 0 40px #FFFAFC, 0 0 70px #3AFF11, 0 0 80px #45FF11, 0 0 100px #4F4F4F, 0 0 150px #18FF11;
+}
+
+.button_red {
+    color: #ff3a3a;
+    background: #a5cd4e;
+}
+ 
+.button_blue {
+    color: #176fff;
+    background: #70c9e3;
+}
+
+#div-freq
+{
+	position:absolute;
+	left: 400px;
+	top:100px;
+	height: 200px; 
+	width:1000px;
+}
+
+#div-freq > ul > li {
+    display: inline-block;
+	font:normal bold 20px tahoma;
+    text-align:center;
+	width:87px;
+}
+
+#freq_disp{
+	border-radius: 5px 5px 5px 5px ;
+	box-shadow:0px 2px 2px 0px rgba(0, 0, 0, 0.5) inset,0px 2px 2px 0px rgba(255, 255, 255, 0.5);
+	background-color: black;
+	width:1000px;
+	padding-top:5px;
+	padding-left:5px;
+	margin-top:10px;
+	margin-bottom:10px;
+	height: 30px; 
+}
+
+#freq_disp > ul > li {
+    display: inline-block;
+	font:normal bold 14px tahoma;
+    text-align:center;
+}
+
+#freq_disp > ul > li:before{
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;  	
+}
+
+#freq_but{
+	width:1000px;
+	margin:0;
+	padding-left:5px;
+}
+
+#freq_but > ul > li {
+    display: inline-block;
+	font:normal bold 14px tahoma;
+    text-align:center;
+	margin-top:5px;
+	margin-bottom:5px;
+}
+
+#freq_but > ul > li:before{
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;  	
+	margin-top:5px;
+	margin-bottom:5px;
+}
+
+#div-scoketscontrols 
+{
+	position:absolute;
+	left: 1350px;
+	top:825px;
+	width: 280px;
+}
+
+#div-scoketscontrols > p
+{
+	display: inline-block;
+	font:normal bold 14px tahoma;
+    text-align:center;
+	margin-right:10px;
+}
+
+#div-scoketscontrols > p > img
+{
+	margin-right:5px;
+	width:10px; 
+	height:10px;
+}
+
+#div-latencymeter
+{
+	position:absolute;
+	left:1680px;
+	top:840px;
+}

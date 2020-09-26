@@ -1,0 +1,224 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*- 
+
+import os 
+import tornado.httpserver
+import tornado.ioloop
+import tornado.web
+import tornado.websocket
+import alsaaudio
+import threading
+import time
+import numpy 
+import gc
+import Hamlib
+
+############ Global variables ##################################
+CTRX=None
+
+############ websocket for send RX audio from TRX ##############
+flagWavstart = False
+AudioRXHandlerClients = []
+
+class loadWavdata(threading.Thread):
+
+	def __init__(self):
+		global flagWavstart
+		threading.Thread.__init__(self)
+		device = 'plughw:CARD=U0x41e0x30d3,DEV=0'
+		self.inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL, channels=1, rate=8000, format=alsaaudio.PCM_FORMAT_FLOAT_LE, periodsize=256, device=device)
+		print('recording...')
+
+	def run(self):
+		global Wavframes, flagWavstart
+		ret=b''
+		while True:
+			while not flagWavstart:
+				time.sleep(0.5)
+			l, ret = self.inp.read()
+			if l > 0:
+				for c in AudioRXHandlerClients:
+					c.Wavframes.append(ret)
+			else:
+				print("overrun")
+
+class AudioRXHandler(tornado.websocket.WebSocketHandler):
+
+	def open(self):
+		self.set_nodelay(True)
+		global flagWavstart
+		if self not in AudioRXHandlerClients:
+			AudioRXHandlerClients.append(self)
+		self.Wavframes = []
+		print('new connection on AudioRXHandler socket.')
+		flagWavstart = True
+		self.tailstream()
+		
+	@tornado.gen.coroutine
+	def tailstream(self):
+		while flagWavstart:
+			while len(self.Wavframes)==0:
+				yield tornado.gen.sleep(0.1)
+			yield self.write_message(self.Wavframes[0],binary=True)
+			del self.Wavframes[0] 
+			
+	def on_close(self):
+		if self in AudioRXHandlerClients:
+			AudioRXHandlerClients.remove(self)
+		global flagWavstart
+		print('connection closed for audioRX')
+		if len(AudioRXHandlerClients)<=0:
+			flagWavstart = False
+		self.Wavframes = []
+		gc.collect()
+
+############ websocket for control TRX ##############
+ControlTRXHandlerClients = []
+
+class TRXRIG:
+	def __init__(self):
+		self.infos = {}
+		self.serialport = Hamlib.hamlib_port_parm_serial
+		self.serialport.rate=38400
+		try:		
+			self.rig_model = "RIG_MODEL_FT817"
+			self.rig_pathname = "/dev/ttyUSB0"
+			self.rig = Hamlib.Rig(Hamlib.__dict__[self.rig_model])  # Look up the model's numerical index in Hamlib's symbol dictionary.
+			self.rig.set_conf("rig_pathname", self.rig_pathname)
+			self.rig.set_conf("retry", "5")
+			self.rig.open()
+		except:
+			logging.error("Could not open a communication channel to the rig via Hamlib!")
+			
+		self.getvfo()
+		self.getFreq()
+		self.getMode()
+		
+	def getvfo(self):
+		try:
+			self.infos["VFO"] = (self.rig.get_vfo())
+		except:
+			logging.error("Could not obtain the current VFO via Hamlib!")
+		return self.infos["VFO"]
+
+	def setFreq(self,frequency):
+		try:
+			self.rig.set_freq(Hamlib.RIG_VFO_CURR, float(frequency))
+			self.getFreq()
+		except:
+			logging.error("Could not set the frequency via Hamlib!")
+		return self.infos["FREQ"]
+		
+	def getFreq(self):
+		try:
+			self.infos["FREQ"] = (int(self.rig.get_freq()))
+		except:
+			logging.error("Could not obtain the current frequency via Hamlib!")
+		return self.infos["FREQ"]
+		
+	def setMode(self,MODE):
+		try:
+		    
+			self.rig.set_mode(Hamlib.rig_parse_mode(MODE))
+			self.getMode()
+		except:
+			logging.error("Could not set the mode via Hamlib!")
+		return self.infos["MODE"]
+		
+	def setPTT(self,status):
+		try:
+			if status:
+				self.rig.set_ptt(Hamlib.RIG_VFO_CURR,Hamlib.RIG_PTT_ON)
+				self.infos["PTT"]="PTT_OFF"
+			else:
+				self.rig.set_ptt(Hamlib.RIG_VFO_CURR,Hamlib.RIG_PTT_OFF)
+				self.infos["PTT"]="PTT_ON"
+		except:
+			logging.error("Could not set the mode via Hamlib!")
+		return self.infos["PTT"]
+		
+	def getMode(self):
+		try:
+			(mode, width) = self.rig.get_mode()
+			self.infos["MODE"] = Hamlib.rig_strrmode(mode).upper()
+			self.infos["WIDTH"] = width
+		except:
+			logging.error("Could not obtain the current Mode via Hamlib!")
+		return self.infos["MODE"]
+
+	def getStrgLVL(self):
+		try:
+			self.infos["StrgLVL"] = self.rig.get_level_i(Hamlib.RIG_LEVEL_STRENGTH)
+		except:
+			logging.error("Could not obtain the current Strength signal RX level via Hamlib!")
+		return self.infos["StrgLVL"]
+		
+	def setPower(self,status=1):
+		try:
+			if status:
+				self.rig.set_powerstat(Hamlib.RIG_POWER_ON)
+			else:
+				self.rig.set_powerstat(Hamlib.RIG_POWER_OFF)
+			self.infos["powerstat"] = status
+		except:
+			logging.error("Could not set power status via Hamlib!")
+		return self.infos["powerstat"]
+
+class ControlTRX(tornado.websocket.WebSocketHandler):
+	def open(self):
+		if self not in ControlTRXHandlerClients:
+			ControlTRXHandlerClients.append(self)
+		print('new connection on ControlTRX socket.')
+		
+	@tornado.gen.coroutine
+	def on_message(self, data) :
+		print(data)
+		
+		try:
+			(action, datato) = data.split(':')
+		except ValueError:
+			action = data
+			pass
+			
+		if(action == "PING"):
+				self.write_message("PONG")
+		elif(action == "getFreq"):
+			yield self.write_message("getFreq:"+str(CTRX.getFreq())) #CTRX()[data]()
+		elif(action == "setFreq"):
+			yield self.write_message("getFreq:"+str(CTRX.setFreq(datato)))
+			
+			
+	def on_close(self):
+		if self in ControlTRXHandlerClients:
+			ControlTRXHandlerClients.remove(self)	
+		gc.collect()
+		
+############ Main ##############
+class MainHandler(tornado.web.RequestHandler):
+	def get(self):
+		self.application.settings.get("compiled_template_cache", False)
+		self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+		self.render("www/index.html")
+
+if __name__ == "__main__":	
+
+	threadloadWavdata = loadWavdata()
+	threadloadWavdata.start()
+
+	CTRX = TRXRIG()
+	CTRX.setPower(1)
+	
+	app = tornado.web.Application([
+	(r'/CTRX', ControlTRX),
+	(r'/audioRX', AudioRXHandler),
+	(r'/', MainHandler),
+	(r'/(.*)', tornado.web.StaticFileHandler, { 'path' : './www' })
+	],debug=True)
+
+	http_server = tornado.httpserver.HTTPServer(app, ssl_options={
+	"certfile": os.path.join("selfsign.crt"),
+	"keyfile": os.path.join("selfsign.key"),
+	})
+	http_server.listen(8888)
+	print('http server started')
+	tornado.ioloop.IOLoop.instance().start()

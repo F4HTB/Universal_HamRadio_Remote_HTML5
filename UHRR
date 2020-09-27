@@ -12,6 +12,8 @@ import time
 import numpy 
 import gc
 import Hamlib
+from opus.decoder import Decoder as OpusDecoder
+import datetime
 
 ############ Global variables ##################################
 CTRX=None
@@ -72,11 +74,50 @@ class AudioRXHandler(tornado.websocket.WebSocketHandler):
 		self.Wavframes = []
 		gc.collect()
 
+############ websocket for control TX ##############
+
+class AudioTXHandler(tornado.websocket.WebSocketHandler):
+
+	def TX_init(self, msg) :
+
+		itrate, is_encoded, op_rate, op_frm_dur = [int(i) for i in msg.split(',')]
+		self.is_encoded = is_encoded
+		self.decoder = OpusDecoder(op_rate, 1)
+		self.frame_size = op_frm_dur * op_rate
+
+		device = 'plughw:CARD=U0x41e0x30d3,DEV=0'
+		self.inp = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NONBLOCK, channels=1, rate=itrate, format=alsaaudio.PCM_FORMAT_S16_LE, periodsize=2048, device=device)		
+	
+	def open(self):
+		print('new connection on AudioTXHandler socket.')
+
+	def on_message(self, data) :
+
+		if str(data).startswith('m:') :
+			self.TX_init(str(data[2:]))
+		elif str(data).startswith('s:') :
+			self.inp.close()
+		else :
+			if self.is_encoded :
+				pcm = self.decoder.decode(data, self.frame_size, False)
+				self.inp.write(pcm)
+				gc.collect()
+
+			else :
+				self.inp.write(data)
+				gc.collect()
+
+	def on_close(self):
+		if(hasattr(self,"inp")):
+			self.inp.close()
+		print('connection closed for TX socket')		
+
 ############ websocket for control TRX ##############
 ControlTRXHandlerClients = []
 
 class TRXRIG:
 	def __init__(self):
+		self.spoints = {"0":-54, "1":-48, "2":-42, "3":-36, "4":-30, "5":-24, "6":-18, "7":-12, "8":-6, "9":0, "10":10, "20":20, "30":30, "40":40, "50":50, "60":60}
 		self.infos = {}
 		self.serialport = Hamlib.hamlib_port_parm_serial
 		self.serialport.rate=38400
@@ -93,6 +134,13 @@ class TRXRIG:
 		self.getvfo()
 		self.getFreq()
 		self.getMode()
+		
+	def parsedbtospoint(self,spoint):
+		for key, value in self.spoints.items():
+			if (spoint<value):
+				return key
+				break
+				
 		
 	def getvfo(self):
 		try:
@@ -125,18 +173,6 @@ class TRXRIG:
 			logging.error("Could not set the mode via Hamlib!")
 		return self.infos["MODE"]
 		
-	def setPTT(self,status):
-		try:
-			if status:
-				self.rig.set_ptt(Hamlib.RIG_VFO_CURR,Hamlib.RIG_PTT_ON)
-				self.infos["PTT"]="PTT_OFF"
-			else:
-				self.rig.set_ptt(Hamlib.RIG_VFO_CURR,Hamlib.RIG_PTT_OFF)
-				self.infos["PTT"]="PTT_ON"
-		except:
-			logging.error("Could not set the mode via Hamlib!")
-		return self.infos["PTT"]
-		
 	def getMode(self):
 		try:
 			(mode, width) = self.rig.get_mode()
@@ -148,10 +184,26 @@ class TRXRIG:
 
 	def getStrgLVL(self):
 		try:
-			self.infos["StrgLVL"] = self.rig.get_level_i(Hamlib.RIG_LEVEL_STRENGTH)
+			self.infos["StrgLVLi"] = self.rig.get_level_i(Hamlib.RIG_LEVEL_STRENGTH)
+			self.infos["StrgLVL"] = self.parsedbtospoint(self.infos["StrgLVLi"])
 		except:
 			logging.error("Could not obtain the current Strength signal RX level via Hamlib!")
 		return self.infos["StrgLVL"]
+		
+	def setPTT(self,status):
+		try:
+			if status == "true":
+				self.rig.set_ptt(Hamlib.RIG_VFO_CURR,Hamlib.RIG_PTT_ON)
+				self.infos["PTT"]=True
+			else:
+				self.rig.set_ptt(Hamlib.RIG_VFO_CURR,Hamlib.RIG_PTT_OFF)
+				self.infos["PTT"]=False
+		except:
+			logging.error("Could not set the mode via Hamlib!")
+		return self.infos["PTT"]
+		
+	def getPTT(self,status):
+		return self.infos["PTT"]
 		
 	def setPower(self,status=1):
 		try:
@@ -164,10 +216,33 @@ class TRXRIG:
 			logging.error("Could not set power status via Hamlib!")
 		return self.infos["powerstat"]
 
+class ticksTRXRIG(threading.Thread):
+
+	def __init__(self):
+		threading.Thread.__init__(self)
+
+	def run(self):
+		while True:
+			CTRX.getStrgLVL()
+			time.sleep(0.5)
+
 class ControlTRX(tornado.websocket.WebSocketHandler):
+
+	def sendPTINFOS(self):
+		try:
+			if self.StrgLVL != CTRX.infos["StrgLVL"]:
+				self.write_message("getSignalLevel:"+str(CTRX.infos["StrgLVL"]))
+				self.StrgLVL=CTRX.infos["StrgLVL"]
+		except:
+			print("error TXMETER")
+			return None
+		tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=0.5), self.sendPTINFOS)
+
 	def open(self):
 		if self not in ControlTRXHandlerClients:
 			ControlTRXHandlerClients.append(self)
+			self.StrgLVL=0
+			self.sendPTINFOS()
 		print('new connection on ControlTRX socket.')
 		
 	@tornado.gen.coroutine
@@ -186,6 +261,12 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 			yield self.write_message("getFreq:"+str(CTRX.getFreq())) #CTRX()[data]()
 		elif(action == "setFreq"):
 			yield self.write_message("getFreq:"+str(CTRX.setFreq(datato)))
+		elif(action == "getMode"):
+			yield self.write_message("getMode:"+str(CTRX.getMode()))	
+		elif(action == "setMode"):
+			yield self.write_message("getMode:"+str(CTRX.setMode(datato)))
+		elif(action == "setPTT"):
+			yield self.write_message("getPTT:"+str(CTRX.setPTT(datato)))			
 			
 			
 	def on_close(self):
@@ -204,16 +285,20 @@ if __name__ == "__main__":
 
 	threadloadWavdata = loadWavdata()
 	threadloadWavdata.start()
-
+	
 	CTRX = TRXRIG()
 	CTRX.setPower(1)
 	
+	threadticksTRXRIG = ticksTRXRIG()
+	threadticksTRXRIG.start()
+	
 	app = tornado.web.Application([
-	(r'/CTRX', ControlTRX),
 	(r'/audioRX', AudioRXHandler),
+	(r'/audioTX', AudioTXHandler),
+	(r'/CTRX', ControlTRX),
 	(r'/', MainHandler),
 	(r'/(.*)', tornado.web.StaticFileHandler, { 'path' : './www' })
-	],debug=True)
+	],debug=True, websocket_ping_interval=10)
 
 	http_server = tornado.httpserver.HTTPServer(app, ssl_options={
 	"certfile": os.path.join("selfsign.crt"),

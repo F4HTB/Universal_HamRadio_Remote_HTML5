@@ -372,14 +372,10 @@ function drawRXSmeter(spoint) {
 	
 	var above_nine="";
 	var res = "S9";
-	if(spoint >= 9){
-		above_nine = spoint - 9;
+	if(spoint > 9){
+		res = "S9+" + spoint; 
 	}
 	else{res = "S" + spoint;}
-	
-	if(above_nine > 0){
-		res += "+" + (10 * above_nine)+"dB";
-	}
 	document.getElementById("div-smeterdigitRX").innerHTML=res;
 }
 

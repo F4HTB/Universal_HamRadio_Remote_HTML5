@@ -14,9 +14,15 @@ import gc
 import Hamlib
 from opus.decoder import Decoder as OpusDecoder
 import datetime
+import configparser
+import sys
+
 
 ############ Global variables ##################################
 CTRX=None
+config = configparser.ConfigParser()
+config.read('UHRR.conf')
+e="No"
 
 ############ websocket for send RX audio from TRX ##############
 flagWavstart = False
@@ -27,7 +33,7 @@ class loadWavdata(threading.Thread):
 	def __init__(self):
 		global flagWavstart
 		threading.Thread.__init__(self)
-		device = 'plughw:CARD=U0x41e0x30d3,DEV=0'
+		device = device = config['AUDIO']['inputdevice']
 		self.inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL, channels=1, rate=8000, format=alsaaudio.PCM_FORMAT_FLOAT_LE, periodsize=256, device=device)
 		print('recording...')
 
@@ -85,7 +91,7 @@ class AudioTXHandler(tornado.websocket.WebSocketHandler):
 		self.decoder = OpusDecoder(op_rate, 1)
 		self.frame_size = op_frm_dur * op_rate
 
-		device = 'plughw:CARD=U0x41e0x30d3,DEV=0'
+		device = config['AUDIO']['outputdevice']
 		self.inp = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NONBLOCK, channels=1, rate=itrate, format=alsaaudio.PCM_FORMAT_S16_LE, periodsize=2048, device=device)		
 	
 	def open(self):
@@ -121,12 +127,13 @@ class TRXRIG:
 		self.infos = {}
 		self.serialport = Hamlib.hamlib_port_parm_serial
 		self.serialport.rate=38400
-		try:		
-			self.rig_model = "RIG_MODEL_FT817"
-			self.rig_pathname = "/dev/ttyUSB0"
+		try:
+			Hamlib.rig_set_debug(Hamlib.RIG_DEBUG_NONE)
+			self.rig_model = "RIG_MODEL_"+str(config['HAMLIB']['rig_model'])
+			self.rig_pathname = config['HAMLIB']['rig_pathname']
 			self.rig = Hamlib.Rig(Hamlib.__dict__[self.rig_model])  # Look up the model's numerical index in Hamlib's symbol dictionary.
 			self.rig.set_conf("rig_pathname", self.rig_pathname)
-			self.rig.set_conf("retry", "5")
+			self.rig.set_conf("retry", config['HAMLIB']['retry'])
 			self.rig.open()
 		except:
 			logging.error("Could not open a communication channel to the rig via Hamlib!")
@@ -236,7 +243,7 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 		except:
 			print("error TXMETER")
 			return None
-		tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=0.5), self.sendPTINFOS)
+		tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=float(config['CTRL']['interval_smeter_update'])), self.sendPTINFOS)
 
 	def open(self):
 		if self not in ControlTRXHandlerClients:
@@ -247,7 +254,8 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 		
 	@tornado.gen.coroutine
 	def on_message(self, data) :
-		print(data)
+		if bool(config['CTRL']['debug']):
+			print(data)
 		
 		try:
 			(action, datato) = data.split(':')
@@ -268,7 +276,6 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 		elif(action == "setPTT"):
 			yield self.write_message("getPTT:"+str(CTRX.setPTT(datato)))			
 			
-			
 	def on_close(self):
 		if self in ControlTRXHandlerClients:
 			ControlTRXHandlerClients.remove(self)	
@@ -276,34 +283,109 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 		
 ############ Main ##############
 class MainHandler(tornado.web.RequestHandler):
+
 	def get(self):
 		self.application.settings.get("compiled_template_cache", False)
 		self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
 		self.render("www/index.html")
+		
+class ConfigHandler(tornado.web.RequestHandler):
+	def get(self):
+		self.application.settings.get("compiled_template_cache", False)
+		self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+		try:
+			from serial.tools.list_ports import comports
+		except ImportError:
+			return None
+		audiodevicesoutput=[s for s in alsaaudio.pcms(0) if "plughw" in s]
+		audiodevicesinput=[s for s in alsaaudio.pcms(1) if "plughw" in s]
+		comports=list(comports())
+		rig_models=[s[10:] for s in dir(Hamlib) if "RIG_MODEL_" in s]
+		self.write("""<html><form method="POST" action="/CONFIG">""")
+		self.write("""[SERVER]<br/><br/>""")
+		self.write("""SERVER port:<input type="text" name="SERVER.port" value="""+config['SERVER']['port']+"""><br/><br/>""")
+		self.write("""If you whant to change certfile and keyfile, replace "UHRH.crt" and "UHRH.key" in the boot folder, and when the pi boot, it will use those files to start http ssl.<br/><br/>""")
+
+		self.write("""[AUDIO]<br/><br/>""")
+		self.write("""AUDIO outputdevice:<select name="AUDIO.outputdevice">""")
+		if(config['AUDIO']['outputdevice']!="null"):
+			self.write("""<option value="""+config['AUDIO']['outputdevice']+""" selected>"""+config['AUDIO']['outputdevice']+"""</option>""")
+		for c in audiodevicesoutput:
+			self.write("""<option value="""+c+""">"""+c+"""</option>""")
+		self.write("""</select><br/><br/>""")
+		
+		self.write("""AUDIO inputdevice:<select name="AUDIO.inputdevice">""")
+		if(config['AUDIO']['inputdevice']!="null"):
+			self.write("""<option value="""+config['AUDIO']['inputdevice']+""" selected>"""+config['AUDIO']['inputdevice']+"""</option>""")
+		for c in audiodevicesinput:
+			self.write("""<option value="""+c+""">"""+c+"""</option>""")
+		self.write("""</select><br/><br/>""")
+
+		self.write("""[HAMLIB]<br/><br/>""")
+		self.write("""HAMLIB com port:<select name="HAMLIB.rig_pathname">""")
+		if(config['HAMLIB']['rig_pathname']!="null"):
+			self.write("""<option value="""+config['HAMLIB']['rig_pathname']+""" selected>"""+config['HAMLIB']['rig_pathname']+"""</option>""")
+		for c in comports:
+			self.write("""<option value="""+str(c.device)+""">"""+str(c.device)+"""</option>""")
+		self.write("""</select><br/><br/>""")
+		
+		self.write("""HAMLIB radio model:<select name="HAMLIB.rig_model">""")
+		if(config['HAMLIB']['rig_model']!="null"):
+			self.write("""<option value="""+config['HAMLIB']['rig_model']+""" selected>"""+config['HAMLIB']['rig_model']+"""</option>""")
+		for c in rig_models:
+			self.write("""<option value="""+c+""">"""+c+"""</option>""")
+		self.write("""</select><br/><br/>""")
+		
+		self.write("""<input type="submit" value="Save & Restart server"><br/><br/></form>Possible problem:"""+e+"""</html>""")
+		
+	def post(self):
+		for x in self.request.arguments:
+			(s,o)=x.split(".")
+			v=self.get_argument(x)
+			print(s,o,v)
+			if config.has_option(s,o):
+				config[s][o]=v
+		with open('UHRR.conf', 'w') as configfile:
+			config.write(configfile)
+		self.write("""<html><head><script>window.setTimeout(function() {window.location.href = 'https://'+window.location.hostname+':'+ '"""+config['SERVER']['port']+"""';}, 10000);</script><head><body>your are redirect automaticly...please wait...</body></html>""")
+		self.flush() 
+		time.sleep(2)
+		os.system("sleep 2;./UHRR &")
+		os._exit(1)
 
 if __name__ == "__main__":	
-
-	threadloadWavdata = loadWavdata()
-	threadloadWavdata.start()
 	
-	CTRX = TRXRIG()
-	CTRX.setPower(1)
-	
-	threadticksTRXRIG = ticksTRXRIG()
-	threadticksTRXRIG.start()
-	
-	app = tornado.web.Application([
-	(r'/audioRX', AudioRXHandler),
-	(r'/audioTX', AudioTXHandler),
-	(r'/CTRX', ControlTRX),
-	(r'/', MainHandler),
-	(r'/(.*)', tornado.web.StaticFileHandler, { 'path' : './www' })
-	],debug=True, websocket_ping_interval=10)
+	try:
+		threadloadWavdata = loadWavdata()
+		threadloadWavdata.start()
+		
+		CTRX = TRXRIG()
+		CTRX.setPower(1)
+		
+		threadticksTRXRIG = ticksTRXRIG()
+		threadticksTRXRIG.start()
+		
+		app = tornado.web.Application([
+		(r'/audioRX', AudioRXHandler),
+		(r'/audioTX', AudioTXHandler),
+		(r'/CTRX', ControlTRX),
+		(r'/CONFIG', ConfigHandler),
+		(r'/', MainHandler),
+		(r'/(.*)', tornado.web.StaticFileHandler, { 'path' : './www' })
+		],debug=bool(config['SERVER']['debug']), websocket_ping_interval=10)
+	except:
+		e = str(sys.exc_info())
+		print(e)
+		app = tornado.web.Application([
+		(r'/CONFIG', ConfigHandler),
+		(r'/', ConfigHandler),
+		(r'/(.*)', tornado.web.StaticFileHandler, { 'path' : './www' })
+		],debug=bool(config['SERVER']['debug']))
 
 	http_server = tornado.httpserver.HTTPServer(app, ssl_options={
-	"certfile": os.path.join("selfsign.crt"),
-	"keyfile": os.path.join("selfsign.key"),
+	"certfile": os.path.join(config['SERVER']['certfile']),
+	"keyfile": os.path.join(config['SERVER']['keyfile']),
 	})
-	http_server.listen(8888)
+	http_server.listen(int(config['SERVER']['port']))
 	print('http server started')
 	tornado.ioloop.IOLoop.instance().start()

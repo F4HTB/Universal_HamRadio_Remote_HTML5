@@ -166,6 +166,21 @@ overflow: hidden;
 	height:25px;
 }
 
+#div-conf 
+{
+	position:absolute;
+	left: 1750px;
+	top:20px;
+	width: 580px;
+}
+
+#div-conf > a > img
+{
+	margin-right:5px;
+	width:25px; 
+	height:25px;
+}
+
 #div-latencymeter
 {
 	font:normal bold 25px tahoma;

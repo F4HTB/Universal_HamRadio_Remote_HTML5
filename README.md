@@ -24,12 +24,12 @@ Here are some pictures concerning the implementation:
 
 Requirements:
 
-sudo apt-get install git python3 pip3 python3-libhamlib2 python3-numpy python3-tornado python3-serial
-sudo pip3 install pyalsaaudio
+sudo apt-get install git python3 pip3 python3-libhamlib2 python3-numpy python3-tornado python3-serial<br>
+sudo pip3 install pyalsaaudio<br>
 
 Installation:
 
-cd ~/
-git clone https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5.git
-cd Universal_HamRadio_Remote_HTML5
-./UHRR
+cd ~/<br>
+git clone https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5.git<br>
+cd Universal_HamRadio_Remote_HTML5<br>
+./UHRR<br>

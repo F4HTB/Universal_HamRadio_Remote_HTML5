@@ -24,7 +24,7 @@ Here are some pictures concerning the implementation:
 
 Requirements:
 
-sudo apt-get install git python3 pip3 python3-libhamlib2 python3-numpy python3-tornado python3-serial<br>
+sudo apt-get install -y git python3 python3-pip3 python3-libhamlib2 python3-numpy python3-tornado python3-serial python3-pyaudio<br>
 sudo pip3 install pyalsaaudio<br>
 
 Installation:
@@ -32,4 +32,6 @@ Installation:
 cd ~/<br>
 git clone https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5.git<br>
 cd Universal_HamRadio_Remote_HTML5<br>
+sudo cp selfsign.crt /boot/UHRH.crt
+sudo cp selfsign.key /boot/UHRH.key
 ./UHRR<br>

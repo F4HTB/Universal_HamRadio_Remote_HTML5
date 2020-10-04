@@ -1,7 +1,7 @@
 # Universal_HamRadio_Remote_HTML5
 Universal HamRadio Remote HTML5 interface.
 
-![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/UHRR_Pict.png?raw=true)
+![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/README/UHRR_Pict.png?raw=true)
 
 This utility is used to set up an amateur radio station remotely via a web browser.
 
@@ -18,6 +18,6 @@ If the original configuration is not good, this will automatically switch to the
 Here are some pictures concerning the implementation:
 
 
-![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/func_princ.png?raw=true)
+![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/README/func_princ.png?raw=true)
 
-![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/sound_diagram.png?raw=true)
+![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/README/sound_diagram.png?raw=true)

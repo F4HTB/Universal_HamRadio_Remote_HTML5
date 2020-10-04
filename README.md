@@ -21,3 +21,15 @@ Here are some pictures concerning the implementation:
 ![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/README/func_princ.png?raw=true)
 
 ![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/README/sound_diagram.png?raw=true)
+
+Requirements:
+
+sudo apt-get install git python3 pip3 python3-libhamlib2 python3-numpy python3-tornado python3-serial
+sudo pip3 install pyalsaaudio
+
+Installation:
+
+cd ~/
+git clone https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5.git
+cd Universal_HamRadio_Remote_HTML5
+./UHRR

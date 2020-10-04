@@ -35,3 +35,12 @@ cd Universal_HamRadio_Remote_HTML5<br>
 sudo cp selfsign.crt /boot/UHRH.crt
 sudo cp selfsign.key /boot/UHRH.key
 ./UHRR<br>
+
+Optional:
+
+sudo apt-get install screen<br>
+
+add in /etc/rc.local the command to run at startup:<br>
+
+sudo nano /etc/rc.local<br>
+copy and past: runuser -l pi -c '(cd /home/pi/Universal_HamRadio_Remote_HTML5/ && screen -S UHRR -dm ./UHRR) &'<br>

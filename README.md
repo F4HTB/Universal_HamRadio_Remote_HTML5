@@ -24,12 +24,23 @@ Here are some pictures concerning the implementation:
 
 Requirements:
 
-sudo apt-get install git python3 pip3 python3-libhamlib2 python3-numpy python3-tornado python3-serial
-sudo pip3 install pyalsaaudio
+sudo apt-get install -y git python3 python3-pip3 python3-libhamlib2 python3-numpy python3-tornado python3-serial python3-pyaudio<br>
+sudo pip3 install pyalsaaudio<br>
 
 Installation:
 
-cd ~/
-git clone https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5.git
-cd Universal_HamRadio_Remote_HTML5
-./UHRR
+cd ~/<br>
+git clone https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5.git<br>
+cd Universal_HamRadio_Remote_HTML5<br>
+sudo cp selfsign.crt /boot/UHRH.crt
+sudo cp selfsign.key /boot/UHRH.key
+./UHRR<br>
+
+Optional:
+
+sudo apt-get install screen<br>
+
+add in /etc/rc.local the command to run at startup:<br>
+
+sudo nano /etc/rc.local<br>
+copy and past: runuser -l pi -c '(cd /home/pi/Universal_HamRadio_Remote_HTML5/ && ./UHRR >> /tmp/uhrr.log) &'<br>

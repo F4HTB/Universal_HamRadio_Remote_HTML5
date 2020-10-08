@@ -1,6 +1,6 @@
 //Extra Generals///////////////////////////////////////////////////////////////////////////
 
-//document.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener('contextmenu', event => event.preventDefault());
 function bodyload(){
 	disableScroll();
 	checkCookie();
@@ -342,42 +342,58 @@ function sendTRXmode(){
 }
 
 function recall_hambands(){
-	var e = document.getElementById("selecthambands");
-	var freq = e.options[e.selectedIndex].value.split(",")[0];
-	var mode = e.options[e.selectedIndex].value.split(",")[1];
-	if (wsControlTRX.readyState === WebSocket.OPEN) {wsControlTRX.send("setFreq:"+freq);wsControlTRX.send("setMode:"+mode);}
+	if (wsControlTRX.readyState === WebSocket.OPEN) {wsControlTRX.send("setFreq:"+event.srcElement.getAttribute('v'));}
 }
 
 function initRXSmeter(){
-	ctxRXsmeter.fillStyle = "black"; 
-	ctxRXsmeter.fillRect(0, 0, 250, 50);
+	ctxRXsmeter.beginPath();
+	ctxRXsmeter.lineWidth = 2;
+	ctxRXsmeter.strokeStyle = '#fffb16';
+	ctxRXsmeter.moveTo(SP[0], 0);
+	ctxRXsmeter.lineTo(SP[0], 50);
+	ctxRXsmeter.stroke();
 	document.getElementById("div-smeterdigitRX").innerHTML="S0";
 }
 
+var SP = {0:0,1:25,2:37,3:50,4:62,5:73,6:84,7:98,8:110,9:123,10:144,20:164,30:180,40:202,50:221,60:240};
+var RIG_LEVEL_STRENGTH = {0:-54,1:-48,2:-42,3:-36,4:-30,5:-24,6:-18,7:-12,8:-6,9:0,10:10,20:20,30:30,40:40,50:50,60:60};
 function drawRXSmeter(spoint) {
-	imgObjSPRX = new ImageData(canvasRXsmeter.width, 1);
-	let canvaswidth = canvasRXsmeter.width * 4;
-	const maxs = spoint*80;
-	for (let px = 0; px < canvaswidth; px += 4) {
-		if((px<(maxs)) && ((px % 80)!==0)){
-		imgObjSPRX.data[px] = 0;   // red
-		imgObjSPRX.data[px+1] = 215; // green
-		imgObjSPRX.data[px+2] = 233; // blue
-		imgObjSPRX.data[px+3] = 255; // alpha
-		}
-	}
-	for(let Line = 0; Line < canvasRXsmeter.height; Line++){
-		ctxRXsmeter.putImageData(imgObjSPRX, 0, Line);
-	}
-	
-	var above_nine="";
+	db=RIG_LEVEL_STRENGTH[spoint];
+	ctxRXsmeter.beginPath();
+	ctxRXsmeter.lineWidth = 2;
+	ctxRXsmeter.moveTo(SP[spoint], 0);
+	ctxRXsmeter.lineTo(SP[spoint], 50);
+	ctxRXsmeter.clearRect(0, 0, 250, 50);
+	ctxRXsmeter.stroke();
 	var res = "S9";
 	if(spoint > 9){
 		res = "S9+" + spoint; 
 	}
 	else{res = "S" + spoint;}
-	document.getElementById("div-smeterdigitRX").innerHTML=res;
+	document.getElementById("div-smeterdigitRX").innerHTML=res+" ("+db+"dB)";
 }
+
+function TXtogle(state="None")
+{
+	if(poweron && ((event.srcElement.className=="button_unpressed") || state=="True"))
+	{
+		button_pressed();
+		toggleRecord(true);
+		toggleaudioRX();
+		sendTRXptt(true);
+	}
+	else
+	{
+		button_unpressed();
+		if(poweron)
+		{
+			toggleRecord();
+			toggleaudioRX();
+			sendTRXptt(false);
+		}
+	}
+}
+
 
 //Cookie routines///////////////////////////////////////////////////////////////////////////
 function setCookie(cname,cvalue,exdays) {
@@ -407,6 +423,7 @@ function checkCookie() {
   var callsign=getCookie("callsign");
   if (callsign != "") {
     alert("Welcome again " + callsign);
+	document.getElementById("callsign").innerHTML=callsign;
   } else {
      callsign = prompt("Please enter your Call Sign:","");
      if (callsign != "" && callsign != null) {
@@ -471,6 +488,56 @@ function recall_freqfromcokkies(){
 }
 
 //Cosmetics
+function changeinputfreqstyle(e){
+	var item=document.getElementById("freq_disp_input_text");
+	var digit_elements = document.getElementsByClassName('freq_digit');
+	ids="inline-block";
+	desd="none";
+	
+	if (e.keyCode == 13) {
+			freq=item.value.toString();
+			showTRXfreq(freq);
+			sendTRXfreq();
+			ids="none";
+			desd="inline-block";
+	}
+	item.style.display = ids;
+	for (var i in digit_elements) {
+		if (digit_elements.hasOwnProperty(i)) {
+			digit_elements[i].style.display = desd;
+		}
+	}
+}
+
+function validateNumber(evt) {
+    var e = evt || window.event;
+    var key = e.keyCode || e.which;
+	var item=document.getElementById("freq_disp_input_text");
+
+	if(key == 77){item.value*=1000000;}
+	if(key == 75){item.value*=1000;}
+
+    if (!e.shiftKey && !e.altKey && !e.ctrlKey &&
+    // numbers   
+    key >= 48 && key <= 57 ||
+    // Numeric keypad
+    key >= 96 && key <= 105 ||
+    // Backspace and Tab and Enter
+    key == 8 || key == 9 || key == 13 ||
+    // Home and End
+    key == 35 || key == 36 ||
+    // left and right arrows
+    key == 37 || key == 39 ||
+    // Del and Ins
+    key == 46 || key == 45) {
+        // input is VALID
+    }
+    else {
+        // input is INVALID
+        e.returnValue = false;
+        if (e.preventDefault) e.preventDefault();
+    }
+}
 
 function get_actualmode()
 {

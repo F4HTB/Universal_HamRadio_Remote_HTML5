@@ -17,7 +17,7 @@
 			<img onclick="powertogle();" id="button_power" src="img/poweroff.png">
 			
 			<form id="RX-GAIN_control">
-				RX GAIN:<input oninput="AudioRX_SetGAIN(this.value/100);" onchange="AudioRX_SetGAIN(this.value/100);" value="50" step="5" type="range" id="C_af" name="volume" min="0" max="1000">
+				AF GAIN:<input oninput="AudioRX_SetGAIN(this.value/100);" onchange="AudioRX_SetGAIN(this.value/100);" value="50" step="5" type="range" id="C_af" name="volume" min="0" max="1000">
 			</form>
 			
 			<div id="Rxmeters">
@@ -29,7 +29,7 @@
 			</div>
 			
 			<form id="TX-GAIN_control">
-				TX GAIN:<input oninput="AudioTX_SetGAIN(this.value/100);" onchange="AudioTX_SetGAIN(this.value/100);" value="50" step="5" type="range" id="C_af" name="volume" min="0" max="200">
+				MIC GAIN:<input oninput="AudioTX_SetGAIN(this.value/100);" onchange="AudioTX_SetGAIN(this.value/100);" value="50" step="5" type="range" id="C_af" name="volume" min="0" max="200">
 			</form>
 			
 			<div id="Txmeters">
@@ -40,12 +40,6 @@
 				</div>
 			</div>
 			
-			<span onmousedown="if(poweron){button_pressed();toggleRecord(true);toggleaudioRX();sendTRXptt(true);}" onmouseup="button_unpressed();if(poweron){toggleRecord();toggleaudioRX();sendTRXptt(false);}" class="button_unpressed" id="TX-record">TX</span>
-			<form id="record_opus">
-				<input type="checkbox" id="encode" alt="Encode TX with opus codec">Encode TX</input><br>
-			</form>
-		
-		
 			<div id="div-freq">
 				<ul id="freq_but">
 				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="cmhz" v=100000000>▲</li>
@@ -60,7 +54,8 @@
 				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="dhz" v=10>▲</li>
 				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="uhz" v=1>▲</li>
 				</ul>
-				<ul id="freq_disp" onwheel="freq_digit_scroll()">
+				<ul ondblclick="changeinputfreqstyle(event);" id="freq_disp" onwheel="freq_digit_scroll()">
+				  <input onkeypress="changeinputfreqstyle(event);" onkeydown="validateNumber(event);"/  id="freq_disp_input_text" type="number" minlength="4" maxlength="8" size="10">
 				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="cmhz" v=100000000>0</li>
 				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="dmhz" v=10000000>0</li>
 				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="umhz" v=1000000>0</li>
@@ -88,25 +83,25 @@
 				</ul>
 			</div>
 			
-			<form id="hambands">
-			  <label>Ham Bands</label>
-			  <select id="selecthambands">
-				<option value="001845500,LSB">160m in LSB</option>
-				<option value="003692500,LSB"> 80m in LSB</option>
-				<option value="007092500,LSB"> 40m in LSB</option>
-				<option value="010140000,USB"> 30m in USB</option>
-				<option value="014127500,USB"> 20m in USB</option>
-				<option value="018132500,USB"> 17m in USB</option>
-				<option value="021287500,USB"> 15m in USB</option>
-				<option value="024952500,USB"> 12m in USB</option>
-				<option value="028362500,USB"> 10m in USB</option>
-				<option value="050202500,USB">  6m in USB</option>
-				<option value="070202500,USB">  4m in USB</option>
-				<option value="144300000,USB">  2m in USB</option>
-				<option value="432200000,USB">70cm in USB</option>
-			  </select>
-			  <label onclick="recall_hambands();">recall</label>
-			</form>
+			<div id="div-bandshortcut">
+				<ul id="band_but">
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="001845500">160m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="003692500">80m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="007092500">40m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="010140000">30m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="014127500">20m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="018132500">17m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="021287500">15m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="027085000">11m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="024952500">12m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="028362500">10m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="050202500">6m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="070202500">4m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="144300000">2m</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="432200000">70cm</li>
+				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="010000000">WWW</li>
+				</ul>
+			</div>
 			
 			<form id="personalfrequency">
 			  <label>Personal Freqs</label>
@@ -120,7 +115,14 @@
 			<canvas class="visualizer" id="canBFSPC" width="1024" height="300"></canvas>
 			<canvas class="visualizer" id="canBFFFT" width="2048" height="140"></canvas>
 			
-			<div id="div-mode_menu">
+			<label id="callsign"></label>
+			
+			<div id="div-conf"><a href="/CONFIG" target="_UHRRconfig"><img src="img/config.png"></a></div>
+			
+			<canvas id="canRXsmeter" width=250 height=50 ></canvas>
+			
+			<div id="div-smeterdigitRX">S9+40dB</div>
+						<div id="div-mode_menu">
 				<ul>
 				  <li onclick="togle_li();sendTRXmode();" class="button_mode button_pressed" lichecked="">USB</li>
 				  <li onclick="togle_li();sendTRXmode();" class="button_mode button_unpressed">LSB</li>
@@ -130,15 +132,21 @@
 				</ul>
 			</div>
 			
-			<canvas id="canRXsmeter" width=250 height=50 ></canvas>
-			<div id="div-smeterdigitRX">S9+40dB</div>
+			<div id="div-TX">
+				<span onmousedown="TXtogle('True');" onmouseup="TXtogle('False');" class="button_unpressed" id="TX-record">TX
+				<form id="TX-record_record_opus">
+					<input type="checkbox" id="encode" alt="Encode TX with opus codec">Encode TX</input><br>
+				</form>
+				</span>
+				<span onclick="TXtogle();" class="button_unpressed" id="TX-record-lock">TX Lock</span>
+			</div>
 			
 			<div id="div-scoketscontrols">
 				<p id="indwsAudioTX"><img src="img/critsred.png">wsTX</p>
 				<p id="indwsAudioRX"><img src="img/critsred.png">wsRX</p>
 				<p id="indwsControlTRX"><img src="img/critsred.png">wsCtrl</p>
 			</div>
-			<div id="div-conf"><a href="/CONFIG" target="_UHRRconfig"><img src="img/config.png"></a></div>
+			
 			<div id="div-latencymeter">latency:∞</div>
 			
 		</div>	

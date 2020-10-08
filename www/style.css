@@ -7,7 +7,7 @@ body {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	/* overflow: hidden; */
+	overflow: hidden;
 }
 
 #ombre-body{
@@ -79,6 +79,54 @@ overflow: hidden;
     background: #70c9e3;
 }
 
+#callsign{
+	position:absolute;
+	left: 1450px;
+	top:20px;
+	height:80px; 
+	width:300px;
+	font: normal bold 25px tahoma;
+	text-align:center;
+}
+
+#personalfrequency
+{
+	position:absolute;
+	left: 1450px;
+	top:400px;
+	height:80px; 
+	width:300px;
+	font: normal bold 25px tahoma;
+	text-align:center;
+}
+
+#personalfrequency > select
+{
+	width:240px;
+	font: normal bold 25px tahoma;
+}
+
+#div-bandshortcut 
+{
+	position:absolute;
+	left: 1450px;
+	top:200px;
+	width: 300px;
+}
+
+#div-bandshortcut > ul
+{
+	padding:0;
+	width:300px;
+}
+
+#div-bandshortcut > ul > li {
+    display: inline-block;
+	font:normal bold 25px tahoma;
+    text-align:center;
+	width:90px;
+}
+
 #div-freq
 {
 	position:absolute;
@@ -118,6 +166,17 @@ overflow: hidden;
     display: inline-block;
     vertical-align: middle;
     height: 100%;  	
+}
+
+#freq_disp_input_text{
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%; 
+	width:100%;
+	font:normal bold 45px tahoma;
+    text-align:center; 	
+	display:none;
 }
 
 #freq_but{
@@ -189,6 +248,13 @@ overflow: hidden;
 	top:825px;
 }
 
+#div-latencymeter > img
+{
+	margin-right:5px;
+	width:25px; 
+	height:25px;
+}
+
 #RX-GAIN_control
 {
 	width:200px; 
@@ -245,25 +311,42 @@ div#Rxmeters div.value {
 	text-align:center;
 }
 
+#div-TX{
+	position:absolute;
+	left:1450px;
+	top:600px;
+	width: 300px;
+	height: 200px;
+}
 #TX-record
 {
 	text-align:center;
-	font:normal bold 110px tahoma;
-	width:200px; 
-	height:140px;
-	position:absolute;
-	left:80px;
-	top:690px;
+	font:normal bold 90px tahoma;
+	height:130px;
+	width:100%;
+	display: inline-block;
+}
+
+#TX-record_record_opus
+{
+	font:normal bold 10px tahoma;
+}
+
+#TX-record-lock
+{
+	text-align:center;
+	font:normal bold 25px tahoma;
+	height:50px;
+	width:100%;
+	display: inline-block;
 }
 
 #record_opus
 {
 	text-align:center;
 	width:200px; 
-	height:140px;
-	position:absolute;
-	left:30px;
-	top:805px;
+	height:170px;
+	width:100%;
 }
 
 #canBFSPC{
@@ -324,38 +407,6 @@ div#Rxmeters div.value {
 }
 
 
-#personalfrequency
-{
-	position:absolute;
-	left: 1130px;
-	top:180px;
-	height: 80px; 
-	width:240px;
-	font: normal bold 25px tahoma;
-}
-
-#personalfrequency > select
-{
-	width:240px;
-	font: normal bold 25px tahoma;
-}
-
-#hambands
-{
-	position:absolute;
-	left: 1130px;
-	top:80px;
-	height: 80px; 
-	width:240px;
-	font: normal bold 25px tahoma;
-}
-
-#hambands > select
-{
-	width:240px;
-	font: normal bold 25px tahoma;
-}
-
 #canRXsmeter{
 	position:absolute;
 	left:1450px;
@@ -366,6 +417,7 @@ div#Rxmeters div.value {
 	background-color:black;
 	border-radius: 5px 5px 5px 5px;
 	box-shadow:0px 2px 2px 0px rgba(0, 0, 0, 0.5) inset,0px 2px 2px 0px rgba(255, 255, 255, 0.5);
+	background: url(img/smeter.png) no-repeat center center
 }
 
 #div-smeterdigitRX
@@ -373,6 +425,9 @@ div#Rxmeters div.value {
 	position:absolute;
 	left:1450px;
 	top:160px;
+	text-align:center;
+	font: normal bold 25px tahoma;
+	width: 250px;
 }
 
 /* @group Blink */

@@ -120,6 +120,7 @@ class AudioTXHandler(tornado.websocket.WebSocketHandler):
 
 ############ websocket for control TRX ##############
 ControlTRXHandlerClients = []
+LastPing = time.time()
 
 class TRXRIG:
 	def __init__(self):
@@ -250,6 +251,7 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 			ControlTRXHandlerClients.append(self)
 			self.StrgLVL=0
 			self.sendPTINFOS()
+		CTRX.setPower(1)
 		print('new connection on ControlTRX socket.')
 		
 	@tornado.gen.coroutine
@@ -280,7 +282,24 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 		if self in ControlTRXHandlerClients:
 			ControlTRXHandlerClients.remove(self)	
 		gc.collect()
-		
+
+def timeoutTRXshutdown():
+	global LastPing
+	print("Shutdown TRX")
+	if(LastPing+300) < time.time():
+		print("Shutdown TRX")
+		CTRX.setPower(0)
+
+class threadtimeoutTRXshutdown(threading.Thread):
+
+	def __init__(self):
+		Thread.__init__(self)
+
+	def run(self):
+		while True:
+			time.sleep(60)
+			timeoutTRXshutdown()
+
 ############ Main ##############
 class MainHandler(tornado.web.RequestHandler):
 
@@ -336,6 +355,13 @@ class ConfigHandler(tornado.web.RequestHandler):
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
 		self.write("""</select><br/><br/>""")
 		
+		self.write("""HAMLIB auto tx poweroff:<select name="HAMLIB.TXautopower">""")
+		if(config['HAMLIB']['TXautopower']!="null"):
+			self.write("""<option value="""+config['HAMLIB']['TXautopower']+""" selected>"""+config['HAMLIB']['TXautopower']+"""</option>""")
+		self.write("""<option value=\"True\">\"True\"</option>""")
+		self.write("""<option value=\"False\">\"False\"</option>""")
+		self.write("""</select><br/><br/>""")
+		
 		self.write("""<input type="submit" value="Save & Restart server"><br/><br/></form>Possible problem:"""+e+"""</html>""")
 		
 	def post(self):
@@ -364,6 +390,11 @@ if __name__ == "__main__":
 		
 		threadticksTRXRIG = ticksTRXRIG()
 		threadticksTRXRIG.start()
+		
+		if(config['HAMLIB']['TXautopower']==True):
+			threadsurveilTRX = threadtimeoutTRXshutdown()
+			threadsurveilTRX.start()
+		
 		
 		app = tornado.web.Application([
 		(r'/audioRX', AudioRXHandler),

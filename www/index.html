@@ -17,7 +17,7 @@
 			<img onclick="powertogle();" id="button_power" src="img/poweroff.png">
 			
 			<form id="RX-GAIN_control">
-				AF GAIN:<input oninput="AudioRX_SetGAIN(this.value/100);" onchange="AudioRX_SetGAIN(this.value/100);" value="50" step="5" type="range" id="C_af" name="volume" min="0" max="1000">
+				AF GAIN:<input oninput="AudioRX_SetGAIN();setCookie('C_af', this.value, 180);" onchange="AudioRX_SetGAIN();setCookie('C_af', this.value, 180);" value="250" step="5" type="range" id="C_af" name="volume" min="0" max="1000">
 			</form>
 			
 			<div id="Rxmeters">
@@ -29,7 +29,7 @@
 			</div>
 			
 			<form id="TX-GAIN_control">
-				MIC GAIN:<input oninput="AudioTX_SetGAIN(this.value/100);" onchange="AudioTX_SetGAIN(this.value/100);" value="50" step="5" type="range" id="C_af" name="volume" min="0" max="200">
+				MIC GAIN:<input oninput="AudioTX_SetGAIN(this.value/100);setCookie('C_mg', this.value, 180);" onchange="AudioTX_SetGAIN(this.value/100);setCookie('C_mg', this.value, 180);" value="50" step="5" type="range" id="C_mg" name="volume" min="0" max="200">
 			</form>
 			
 			<div id="Txmeters">
@@ -119,6 +119,10 @@
 				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" >Custom</li>
 				</ul>
 			</div>
+			
+			<form id="SQUELCH_control">
+				SQL:<input oninput="if(poweron)drawRXSmeter();setCookie('SQUELCH', this.value, 180);" onchange="if(poweron)drawRXSmeter();setCookie('SQUELCH', this.value, 180);" value="0" step="5" type="range" id="SQUELCH" name="SQUELCH" min="0" max="100">
+			</form>			
 			
 			<form id="personalfrequency">
 			  <label>Personal Freqs</label>

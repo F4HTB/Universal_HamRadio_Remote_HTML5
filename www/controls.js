@@ -1,10 +1,10 @@
 //Extra Generals///////////////////////////////////////////////////////////////////////////
 
 // document.addEventListener('contextmenu', event => event.preventDefault());
-// function bodyload(){
+function bodyload(){
 	// disableScroll();
-	// checkCookie();
-// }
+	checkCookie();
+}
 
 // function disableScroll() { 
     // // Get the current page scroll position 
@@ -121,6 +121,8 @@ function AudioRX_start(){
 	AudioRX_biquadFilter_node.frequency.setValueAtTime(22000, AudioRX_context.currentTime);
 	AudioRX_biquadFilter_node.gain.setValueAtTime(0, AudioRX_context.currentTime);
 	
+	AudioRX_SetGAIN();
+	
 }
 
 function setaudiofilter(){
@@ -130,8 +132,9 @@ function setaudiofilter(){
 	AudioRX_biquadFilter_node.Q.setValueAtTime(parseInt(event.srcElement.getAttribute('fq')), AudioRX_context.currentTime);
 }
 
-function AudioRX_SetGAIN( vol ){
-	AudioRX_gain_node.gain.setValueAtTime(vol, AudioRX_context.currentTime);
+function AudioRX_SetGAIN( vol="None" ){
+	if(vol == "None"){volumeRX=document.getElementById("C_af").value/100;vol=volumeRX;}
+	if(poweron){AudioRX_gain_node.gain.setValueAtTime(vol, AudioRX_context.currentTime);}
 }
 
 function wsAudioRXopen(){
@@ -156,16 +159,13 @@ function AudioRX_stop()
 	AudioRX_context.close();
 }
 
-var volumeRX = 50;
 var muteRX=false;
-function toggleaudioRX(){
+function toggleaudioRX(stat="None"){
 	muteRX=!muteRX;
-	if(muteRX){volumeRX=AudioRX_gain_node.gain.value;AudioRX_SetGAIN(0);}
-	else{AudioRX_SetGAIN(volumeRX);}
+	if(stat != "None"){muteRX=stat;}
+	if(muteRX){AudioRX_SetGAIN(0);}
+	else{AudioRX_SetGAIN();}
 }
-
-
-
 
 function drawRXFFT(Audio_analyser){
 var arrayFFT = new Float32Array(Audio_analyser.frequencyBinCount);
@@ -247,13 +247,14 @@ function ControlTRX_start(){
 	wsControlTRX.onmessage = wsControlTRXcrtol;
 }
 
+var SignalLevel=0;
 function wsControlTRXcrtol( msg ){
 	console.log(String(msg.data));
 	words = String(msg.data).split(':');
 	if(words[0] == "PONG"){showlatency();}
 	else if(words[0] == "getFreq"){showTRXfreq(words[1]);}
 	else if(words[0] == "getMode"){showTRXmode(words[1]);}
-	else if(words[0] == "getSignalLevel"){drawRXSmeter(words[1]);}
+	else if(words[0] == "getSignalLevel"){SignalLevel=words[1];drawRXSmeter();}
 }
 
 function ControlTRX_stop()
@@ -375,20 +376,33 @@ function initRXSmeter(){
 
 var SP = {0:0,1:25,2:37,3:50,4:62,5:73,6:84,7:98,8:110,9:123,10:144,20:164,30:180,40:202,50:221,60:240};
 var RIG_LEVEL_STRENGTH = {0:-54,1:-48,2:-42,3:-36,4:-30,5:-24,6:-18,7:-12,8:-6,9:0,10:10,20:20,30:30,40:40,50:50,60:60};
-function drawRXSmeter(spoint) {
-	db=RIG_LEVEL_STRENGTH[spoint];
+function drawRXSmeter() {
+	db=RIG_LEVEL_STRENGTH[SignalLevel];
 	ctxRXsmeter.beginPath();
 	ctxRXsmeter.lineWidth = 2;
-	ctxRXsmeter.moveTo(SP[spoint], 0);
-	ctxRXsmeter.lineTo(SP[spoint], 50);
+	ctxRXsmeter.moveTo(SP[SignalLevel], 0);
+	ctxRXsmeter.lineTo(SP[SignalLevel], 50);
 	ctxRXsmeter.clearRect(0, 0, 250, 50);
+	ctxRXsmeter.strokeStyle = '#fffb16';	
 	ctxRXsmeter.stroke();
+	
+	sq=document.getElementById("SQUELCH").value*2.5;
+	ctxRXsmeter.beginPath();
+	ctxRXsmeter.lineWidth = 2;
+	ctxRXsmeter.strokeStyle = '#deded5';
+	ctxRXsmeter.moveTo(sq, 0);
+	ctxRXsmeter.lineTo(sq, 50);
+	ctxRXsmeter.stroke();
+	
 	var res = "S9";
-	if(spoint > 9){
-		res = "S9+" + spoint; 
+	if(SignalLevel > 9){
+		res = "S9+" + SignalLevel; 
 	}
-	else{res = "S" + spoint;}
+	else{res = "S" + SignalLevel;}
 	document.getElementById("div-smeterdigitRX").innerHTML=res+" ("+db+"dB)";
+	
+	if(SP[SignalLevel]>=sq && !muteRX){AudioRX_SetGAIN();}
+	else{AudioRX_SetGAIN(0);}
 }
 
 function TXtogle(state="None")
@@ -448,6 +462,12 @@ function checkCookie() {
        setCookie("callsign", callsign, 180);
      }
   } 
+	var vol=getCookie("C_af");
+	if(vol != ""){document.getElementById("C_af").value=vol;}
+	var sql=getCookie("SQUELCH");
+	if(sql != ""){document.getElementById("SQUELCH").value=sql;}
+	var mg=getCookie("C_mg");
+	if(mg != ""){document.getElementById("C_mg").value=mg;}
 	get_freqfromcokkies();
 }
 
@@ -1082,7 +1102,7 @@ function stopRecord()
 }
 
 function AudioTX_SetGAIN( vol ){
-	mh.gain_node.gain.setValueAtTime(vol, mh.context.currentTime);
+	if(poweron)mh.gain_node.gain.setValueAtTime(vol, mh.context.currentTime);
 }
 
 function toggleRecord(sendit = false)

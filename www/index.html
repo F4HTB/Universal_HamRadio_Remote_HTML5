@@ -14,7 +14,7 @@
         </div>
 	
 		<div id="div-princ">
-			<img onclick="powertogle();" id="button_power" src="img/poweroff.png">
+			<img onclick="powertogle();" id="button_power" alt="Click to connect or disconnect interface" src="img/poweroff.png">
 			
 			<form id="RX-GAIN_control">
 				AF GAIN:<input oninput="AudioRX_SetGAIN();setCookie('C_af', this.value, 180);" onchange="AudioRX_SetGAIN();setCookie('C_af', this.value, 180);" value="250" step="5" type="range" id="C_af" name="volume" min="0" max="1000">
@@ -105,20 +105,39 @@
 			
 			<div id="div-filtershortcut">
 				<ul id="band_but">
-				  <li onclick="togle_li();setaudiofilter();" class="button_pressed" lichecked="" fq="0" fg="0" ft="highshelf" frq="22000">None</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="4400">LP 4.4k</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="3300">LP 3.3k</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="2700">LP 2.7k</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="2100">LP 2.1k</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="1000">LP 1.0k</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="200">BP 200hz</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="300">BP 300hz</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="500">BP 500hz</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="800">BP 800hz</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="1000">BP 1khz</li>
-				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" >Custom</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_pressed" lichecked="" fq="0" fg="0" ft="highshelf" frq="22000">None</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="4400">LP 4.4k</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="3300">LP 3.3k</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="2700">LP 2.7k</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="2100">LP 2.1k</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="1000">LP 1.0k</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="300">BP 300hz</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="500">BP 500hz</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="800">BP 800hz</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="1000">BP 1khz</li>
+				  <li onclick="if(poweron)togle_li();setaudiofilter();" class="button_unpressed" id="custom_filter_click" fq="0" fg="0" ft="highshelf" frq="22000">BP click</li>
+				  <li onclick="if(poweron)togle_li();document.getElementById('div-customfilter').style.display = 'block';" class="button_unpressed" fq="0" fg="0" ft="highshelf" frq="22000">Custom</li>
 				</ul>
 			</div>
+			
+			<div id="div-customfilter">
+				filter_type:<select id="customfilter_T">
+					<option >--Please choose a filter type--</option>
+					<option value="lowpass">lowpass</option>
+					<option value="highpass">highpass</option>
+					<option value="bandpass">bandpass</option>
+					<option value="lowshelf">lowshelf</option>
+					<option value="highshelf">highshelf</option>
+					<option value="peaking">peaking</option>
+					<option value="notch">notch</option>
+					<option value="allpass">allpass</option>
+				</select><br>
+				Freq:<input type="text" id="customfilter_F" value="click to FFT to set">hz<br>
+				Q Factor:<input type ="text" id="customfilter_Q" value="50"><br>
+				Gain:<input type ="text" id="customfilter_G" value="50"><br>
+				<input value="ok" type ="button" onclick="document.getElementById('div-customfilter').style.display = 'none';setcustomaudiofilter();">
+			</div>
+			
 			
 			<form id="SQUELCH_control">
 				SQL:<input oninput="if(poweron)drawRXSmeter();setCookie('SQUELCH', this.value, 180);" onchange="if(poweron)drawRXSmeter();setCookie('SQUELCH', this.value, 180);" value="0" step="5" type="range" id="SQUELCH" name="SQUELCH" min="0" max="100">
@@ -133,8 +152,9 @@
 			  <label onclick="save_freqtocokkies();">&nbsp;save</label>
 			</form>
 			
-			<canvas class="visualizer" id="canBFSPC" width="1024" height="300"></canvas>
-			<canvas class="visualizer" id="canBFFFT" width="2048" height="140"></canvas>
+			<canvas class="visualizer" id="canBFSPC" width="1024" ></canvas>
+			<canvas class="visualizer" id="canBFFFT" width="2048" ></canvas>
+			<label id="canvasBFFFT_coord"></label>
 			
 			<label id="callsign"></label>
 			

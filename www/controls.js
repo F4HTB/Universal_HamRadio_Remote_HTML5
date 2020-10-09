@@ -70,6 +70,7 @@ var AudioRX_biquadFilter_node = "";
 var AudioRX_analyser = "";
 var audiobufferready = false;
 var AudioRX_audiobuffer = [];
+var AudioRX_sampleRate=8000;
 
 function AudioRX_start(){
 	document.getElementById("indwsAudioRX").innerHTML='<img src="img/critsgrey.png">wsRX';
@@ -91,7 +92,7 @@ function AudioRX_start(){
 	}
 
 	var BUFF_SIZE = 256; // spec allows, yet do not go below 1024 
-	AudioRX_context = new AudioContext({latencyHint: "interactive",sampleRate: 8000});
+	AudioRX_context = new AudioContext({latencyHint: "interactive",sampleRate: AudioRX_sampleRate});
 	AudioRX_gain_node = AudioRX_context.createGain();
 	AudioRX_biquadFilter_node = AudioRX_context.createBiquadFilter();
 	AudioRX_analyser = AudioRX_context.createAnalyser();
@@ -126,10 +127,21 @@ function AudioRX_start(){
 }
 
 function setaudiofilter(){
-	AudioRX_biquadFilter_node.type = event.srcElement.getAttribute('ft');
-	AudioRX_biquadFilter_node.frequency.setValueAtTime(parseInt(event.srcElement.getAttribute('frq')), AudioRX_context.currentTime);
-	AudioRX_biquadFilter_node.gain.setValueAtTime(parseInt(event.srcElement.getAttribute('fg')), AudioRX_context.currentTime);
-	AudioRX_biquadFilter_node.Q.setValueAtTime(parseInt(event.srcElement.getAttribute('fq')), AudioRX_context.currentTime);
+	if(poweron){
+		AudioRX_biquadFilter_node.type = event.srcElement.getAttribute('ft');
+		AudioRX_biquadFilter_node.frequency.setValueAtTime(parseInt(event.srcElement.getAttribute('frq')), AudioRX_context.currentTime);
+		AudioRX_biquadFilter_node.gain.setValueAtTime(parseInt(event.srcElement.getAttribute('fg')), AudioRX_context.currentTime);
+		AudioRX_biquadFilter_node.Q.setValueAtTime(parseInt(event.srcElement.getAttribute('fq')), AudioRX_context.currentTime);
+	}
+}
+
+function setcustomaudiofilter(){
+	if(poweron){
+		AudioRX_biquadFilter_node.type = document.getElementById("customfilter_T").value;
+		AudioRX_biquadFilter_node.frequency.setValueAtTime(parseInt(document.getElementById("customfilter_F").value), AudioRX_context.currentTime);
+		AudioRX_biquadFilter_node.gain.setValueAtTime(parseInt(document.getElementById("customfilter_G").value), AudioRX_context.currentTime);
+		AudioRX_biquadFilter_node.Q.setValueAtTime(parseInt(document.getElementById("customfilter_Q").value), AudioRX_context.currentTime);
+	}
 }
 
 function AudioRX_SetGAIN( vol="None" ){
@@ -167,11 +179,14 @@ function toggleaudioRX(stat="None"){
 	else{AudioRX_SetGAIN();}
 }
 
-function drawRXFFT(Audio_analyser){
-var arrayFFT = new Float32Array(Audio_analyser.frequencyBinCount);
-Audio_analyser.getFloatFrequencyData(arrayFFT);
+
 canvasBFFFT = document.getElementById("canBFFFT");
 ctxFFFT = canvasBFFFT.getContext("2d");
+
+function drawRXFFT(Audio_analyser){
+Audio_analyser.fftSize = canvasBFFFT.width;
+var arrayFFT = new Float32Array(Audio_analyser.frequencyBinCount);
+Audio_analyser.getFloatFrequencyData(arrayFFT);
 ctxFFFT.clearRect(0, 0, canvasBFFFT.width, canvasBFFFT.height);
 ctxFFFT.fillStyle = 'rgb(0, 0, 0)';
 ctxFFFT.fillRect(0, 0, canvasBFFFT.width, canvasBFFFT.height);
@@ -179,12 +194,35 @@ var largeurBarre = (canvasBFFFT.width / Audio_analyser.frequencyBinCount);
 var hauteurBarre;
 var x = 0;
   for(var i = 0; i < Audio_analyser.frequencyBinCount; i++) {
-    hauteurBarre = (arrayFFT[i] + 140)*2;
-    ctxFFFT.fillStyle = 'rgb(' + Math.floor(hauteurBarre+100) + ',50,50)';
-    ctxFFFT.fillRect(x, canvasBFFFT.height-hauteurBarre/2, largeurBarre, hauteurBarre/2);
-    x += largeurBarre + 1;
+    hauteurBarre = (arrayFFT[i] + canvasBFFFT.height);
+    ctxFFFT.fillStyle = 'rgb(' + Math.floor(hauteurBarre*2+100) + ',50,50)';
+    ctxFFFT.fillRect(x, canvasBFFFT.height-hauteurBarre, largeurBarre, hauteurBarre);
+    x += largeurBarre;
   }
 }
+
+canvasBFFFT_coord = document.getElementById("canvasBFFFT_coord");
+canvasBFFFT.addEventListener('mousemove', function(evt) {
+	var rect = canvasBFFFT.getBoundingClientRect()
+	scaleX = canvasBFFFT.width / rect.width;    // relationship bitmap vs. element for X
+    scaleY = canvasBFFFT.height / rect.height;  // relationship bitmap vs. element for Y
+	hzperpixel=(AudioRX_sampleRate/2)/rect.width;
+	
+	canvasBFFFT_coord.innerHTML = parseInt((((evt.clientX - rect.left) * scaleX) * (AudioRX_sampleRate/2))/canvasBFFFT.width) + 'hz ,-' + parseInt((evt.clientY - rect.top) * scaleY)+'dB';
+}, false);
+
+canvasBFFFT.addEventListener('click', function(evt) {
+	var rect = canvasBFFFT.getBoundingClientRect()
+	scaleX = canvasBFFFT.width / rect.width;
+	if(document.getElementById("custom_filter_click").hasAttribute('lichecked')){
+		AudioRX_biquadFilter_node.type = "bandpass";
+		AudioRX_biquadFilter_node.frequency.setValueAtTime(parseInt((((evt.clientX - rect.left) * scaleX) * (AudioRX_sampleRate/2))/canvasBFFFT.width), AudioRX_context.currentTime);
+		AudioRX_biquadFilter_node.gain.setValueAtTime(-100, AudioRX_context.currentTime);
+		AudioRX_biquadFilter_node.Q.setValueAtTime(50, AudioRX_context.currentTime);
+	}
+	else{document.getElementById("customfilter_F").value=parseInt((((evt.clientX - rect.left) * scaleX) * (AudioRX_sampleRate/2))/canvasBFFFT.width);}
+}, false);
+
 
 function drawRXSPC(Audio_analyser){
 var arraySPC = new Float32Array(Audio_analyser.fftSize);
@@ -201,8 +239,7 @@ var largeurTranche = canvasBFspc.width * 1.0 / Audio_analyser.fftSize;
 var x = 0;
 
   for(var i = 0; i < Audio_analyser.fftSize; i++) {
-    var v = arraySPC[i] * 200.0;
-    var y = canvasBFspc.height/2 + v;
+    var y = canvasBFspc.height/2 + arraySPC[i] * canvasBFspc.height;
 	
     if(i === 0) {
       ctxFwf.moveTo(x, y);

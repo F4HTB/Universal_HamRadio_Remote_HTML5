@@ -81,8 +81,22 @@ class AudioRXHandler(tornado.websocket.WebSocketHandler):
 		gc.collect()
 
 ############ websocket for control TX ##############
+last_AudioTXHandler_msg_time=0
+AudioTXHandlerClients = []
 
 class AudioTXHandler(tornado.websocket.WebSocketHandler):
+
+	def stoppttontimeout(self):
+		global last_AudioTXHandler_msg_time
+		try:
+			if time.time() > last_AudioTXHandler_msg_time + 10:
+				if self.ws_connection and CTRX.infos["PTT"]==True:
+					CTRX.setPTT("false")
+					print("stop ptt on timeout")
+		except:
+			return None
+		tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=1), self.stoppttontimeout)
+
 
 	def TX_init(self, msg) :
 
@@ -95,10 +109,17 @@ class AudioTXHandler(tornado.websocket.WebSocketHandler):
 		self.inp = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NONBLOCK, channels=1, rate=itrate, format=alsaaudio.PCM_FORMAT_S16_LE, periodsize=2048, device=device)		
 	
 	def open(self):
-		print('new connection on AudioTXHandler socket.')
+		global last_AudioTXHandler_msg_time, AudioTXHandlerClients
+		if self not in AudioTXHandlerClients:
+			AudioTXHandlerClients.append(self)
+			print('new connection on AudioTXHandler socket.')
+		last_AudioTXHandler_msg_time=time.time()
+		self.stoppttontimeout()
 
 	def on_message(self, data) :
-
+		global last_AudioTXHandler_msg_time
+		last_AudioTXHandler_msg_time=time.time()
+		
 		if str(data).startswith('m:') :
 			self.TX_init(str(data[2:]))
 		elif str(data).startswith('s:') :
@@ -114,8 +135,13 @@ class AudioTXHandler(tornado.websocket.WebSocketHandler):
 				gc.collect()
 
 	def on_close(self):
+		global AudioTXHandlerClients
 		if(hasattr(self,"inp")):
 			self.inp.close()
+		if self in AudioTXHandlerClients:
+			AudioTXHandlerClients.remove(self)
+		if (not len(AudioTXHandlerClients)) and (CTRX.infos["PTT"]==True):
+			CTRX.setPTT("false")
 		print('connection closed for TX socket')		
 
 ############ websocket for control TRX ##############
@@ -126,6 +152,7 @@ class TRXRIG:
 	def __init__(self):
 		self.spoints = {"0":-54, "1":-48, "2":-42, "3":-36, "4":-30, "5":-24, "6":-18, "7":-12, "8":-6, "9":0, "10":10, "20":20, "30":30, "40":40, "50":50, "60":60}
 		self.infos = {}
+		self.infos["PTT"]=False
 		self.serialport = Hamlib.hamlib_port_parm_serial
 		self.serialport.rate=38400
 		try:
@@ -236,6 +263,11 @@ class ticksTRXRIG(threading.Thread):
 
 class ControlTRX(tornado.websocket.WebSocketHandler):
 
+	def send_to_all_clients(self,msg):
+		print ("Send to all: "+msg)
+		for client in ControlTRXHandlerClients:
+			client.write_message(msg)
+
 	def sendPTINFOS(self):
 		try:
 			if self.StrgLVL != CTRX.infos["StrgLVL"]:
@@ -268,15 +300,15 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 		if(action == "PING"):
 				self.write_message("PONG")
 		elif(action == "getFreq"):
-			yield self.write_message("getFreq:"+str(CTRX.getFreq())) #CTRX()[data]()
+			yield self.send_to_all_clients("getFreq:"+str(CTRX.getFreq())) #CTRX()[data]()
 		elif(action == "setFreq"):
-			yield self.write_message("getFreq:"+str(CTRX.setFreq(datato)))
+			yield self.send_to_all_clients("getFreq:"+str(CTRX.setFreq(datato)))
 		elif(action == "getMode"):
-			yield self.write_message("getMode:"+str(CTRX.getMode()))	
+			yield self.send_to_all_clients("getMode:"+str(CTRX.getMode()))	
 		elif(action == "setMode"):
-			yield self.write_message("getMode:"+str(CTRX.setMode(datato)))
+			yield self.send_to_all_clients("getMode:"+str(CTRX.setMode(datato)))
 		elif(action == "setPTT"):
-			yield self.write_message("getPTT:"+str(CTRX.setPTT(datato)))			
+			yield self.send_to_all_clients("getPTT:"+str(CTRX.setPTT(datato)))			
 			
 	def on_close(self):
 		if self in ControlTRXHandlerClients:

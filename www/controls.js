@@ -1,21 +1,21 @@
 //Extra Generals///////////////////////////////////////////////////////////////////////////
 
-document.addEventListener('contextmenu', event => event.preventDefault());
-function bodyload(){
-	disableScroll();
-	checkCookie();
-}
+// document.addEventListener('contextmenu', event => event.preventDefault());
+// function bodyload(){
+	// disableScroll();
+	// checkCookie();
+// }
 
-function disableScroll() { 
-    // Get the current page scroll position 
-    scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
-    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft, 
+// function disableScroll() { 
+    // // Get the current page scroll position 
+    // scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
+    // scrollLeft = window.pageXOffset || document.documentElement.scrollLeft, 
   
-        // if any scroll is attempted, set this to the previous value 
-        window.onscroll = function() { 
-            window.scrollTo(scrollLeft, scrollTop); 
-        }; 
-}
+        // // if any scroll is attempted, set this to the previous value 
+        // window.onscroll = function() { 
+            // window.scrollTo(scrollLeft, scrollTop); 
+        // }; 
+// }
 
 //Generals routines///////////////////////////////////////////////////////////////////////////
 var poweron = false;
@@ -38,6 +38,7 @@ function powertogle()
 		ctxRXsmeter = canvasRXsmeter.getContext("2d");
 		initRXSmeter();
 		
+		button_light_all("div-filtershortcut");
 	}
 	else{
 		event.srcElement.src="img/poweroff.png";
@@ -45,6 +46,8 @@ function powertogle()
 		AudioTX_stop();
 		ControlTRX_stop();
 		poweron = false;
+		button_unlight_all("div-filtershortcut");
+		button_unlight_all("div-mode_menu");
 	}
 }
 
@@ -63,6 +66,7 @@ var wsAudioRX = "";
 var AudioRX_context = "";
 var AudioRX_source_node = "";
 var AudioRX_gain_node = "";
+var AudioRX_biquadFilter_node = "";
 var AudioRX_analyser = "";
 var audiobufferready = false;
 var AudioRX_audiobuffer = [];
@@ -89,7 +93,9 @@ function AudioRX_start(){
 	var BUFF_SIZE = 256; // spec allows, yet do not go below 1024 
 	AudioRX_context = new AudioContext({latencyHint: "interactive",sampleRate: 8000});
 	AudioRX_gain_node = AudioRX_context.createGain();
-	AudioRX_gain_node.connect( AudioRX_context.destination );
+	AudioRX_biquadFilter_node = AudioRX_context.createBiquadFilter();
+	AudioRX_analyser = AudioRX_context.createAnalyser();
+	
 	AudioRX_source_node = AudioRX_context.createScriptProcessor(BUFF_SIZE, 1, 1);
 
 	AudioRX_source_node.onaudioprocess = (function() {
@@ -104,12 +110,24 @@ function AudioRX_start(){
 		};
 	}());
 
-	AudioRX_source_node.connect(AudioRX_gain_node);
-	AudioRX_analyser = AudioRX_context.createAnalyser();
-	// AudioRX_source_node.connect(AudioRX_analyser);
+	AudioRX_source_node.connect(AudioRX_biquadFilter_node);
+	AudioRX_biquadFilter_node.connect(AudioRX_gain_node);
 	AudioRX_gain_node.connect(AudioRX_analyser);
+	AudioRX_gain_node.connect( AudioRX_context.destination );
 	drawBF();
 	drawRXvol();
+	
+	AudioRX_biquadFilter_node.type = "lowshelf";
+	AudioRX_biquadFilter_node.frequency.setValueAtTime(22000, AudioRX_context.currentTime);
+	AudioRX_biquadFilter_node.gain.setValueAtTime(0, AudioRX_context.currentTime);
+	
+}
+
+function setaudiofilter(){
+	AudioRX_biquadFilter_node.type = event.srcElement.getAttribute('ft');
+	AudioRX_biquadFilter_node.frequency.setValueAtTime(parseInt(event.srcElement.getAttribute('frq')), AudioRX_context.currentTime);
+	AudioRX_biquadFilter_node.gain.setValueAtTime(parseInt(event.srcElement.getAttribute('fg')), AudioRX_context.currentTime);
+	AudioRX_biquadFilter_node.Q.setValueAtTime(parseInt(event.srcElement.getAttribute('fq')), AudioRX_context.currentTime);
 }
 
 function AudioRX_SetGAIN( vol ){
@@ -566,6 +584,24 @@ function button_unpressed(item)
 	item.classList.remove('button_pressed');
 	item.classList.add('button_unpressed');
 }
+
+function button_unlight_all(iddiv){
+	var items = document.getElementById(iddiv).getElementsByTagName("li");
+	for (var i = 0; i < items.length; ++i) {
+		items[i].classList.remove('button_green');	
+	}
+}
+
+function button_light_all(iddiv)
+{
+	var items = document.getElementById(iddiv).getElementsByTagName("li");
+	for (var i = 0; i < items.length; ++i) {
+		if(items[i].hasAttribute('lichecked')){
+			items[i].classList.add('button_green');
+		}
+	}
+}
+
 
 function button_light(item,color="G")
 {

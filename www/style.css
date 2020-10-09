@@ -7,7 +7,7 @@ body {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	overflow: hidden;
+	/* overflow: hidden; */
 }
 
 #ombre-body{
@@ -93,16 +93,18 @@ overflow: hidden;
 {
 	position:absolute;
 	left: 1450px;
-	top:400px;
-	height:80px; 
+	top:360px;
+	height:110px; 
 	width:300px;
 	font: normal bold 25px tahoma;
 	text-align:center;
+	margin:0px;
+	padding:0px;
 }
 
 #personalfrequency > select
 {
-	width:240px;
+	width:300px;
 	font: normal bold 25px tahoma;
 }
 
@@ -110,13 +112,14 @@ overflow: hidden;
 {
 	position:absolute;
 	left: 1450px;
-	top:200px;
+	top:190px;
 	width: 300px;
 }
 
 #div-bandshortcut > ul
 {
 	padding:0;
+	margin:0px;
 	width:300px;
 }
 
@@ -124,35 +127,63 @@ overflow: hidden;
     display: inline-block;
 	font:normal bold 25px tahoma;
     text-align:center;
-	width:90px;
+	width:97px;
 }
+
+
+#div-filtershortcut
+{
+	position:absolute;
+	left: 425px;
+	top:600px;
+	width: 450px;
+	height:200px;
+}
+
+#div-filtershortcut > ul
+{
+	padding:0;
+	width: 450px;
+	height:200px;
+	margin:0px;
+	padding:0px;
+}
+
+#div-filtershortcut > ul > li {
+    display: inline-block;
+	font:normal bold 25px tahoma;
+    text-align:center;
+	width:147px;
+}
+
 
 #div-freq
 {
 	position:absolute;
-	left: 400px;
+	left: 425px;
 	top:80px;
 	height: 200px; 
-	width:700px;
+	width:450px;
 }
 
 #div-freq > ul > li {
     display: inline-block;
 	font:normal bold 45px tahoma;
     text-align:center;
-	width:60px;
+	width:37px;
 }
 
 #freq_disp{
 	border-radius: 5px 5px 5px 5px ;
 	box-shadow:0px 2px 2px 0px rgba(0, 0, 0, 0.5) inset,0px 2px 2px 0px rgba(255, 255, 255, 0.5);
 	background-color: black;
-	width:700px;
+	width:450px;
 	padding-top:5px;
-	padding-left:5px;
+	padding-left:0px;
 	margin-top:10px;
 	margin-bottom:10px;
 	height: 60px; 
+	text-align:center; 	
 }
 
 #freq_disp > ul > li {
@@ -180,9 +211,10 @@ overflow: hidden;
 }
 
 #freq_but{
-	width:700px;
+	width:450px;
 	margin:0;
-	padding-left:5px;
+	padding-left:0px;
+	text-align:center; 	
 }
 
 #freq_but > ul > li {
@@ -257,10 +289,10 @@ overflow: hidden;
 
 #RX-GAIN_control
 {
-	width:200px; 
+	width:300px; 
 	height:140px;
 	position:absolute;
-	left:80px;
+	left:50px;
 	top:300px;
 	font:normal bold 25px tahoma;
 	text-align:center;
@@ -268,9 +300,9 @@ overflow: hidden;
 
 div#Txmeters > div {
 	text-align:center;
-	width:200px; 
+	width:300px; 
   	position:absolute;
-	left: 80px;
+	left: 50px;
 	top:600px;
 	font:normal bold 25px tahoma;
 }
@@ -285,9 +317,9 @@ div#Txmeters div.value {
 
 div#Rxmeters > div {
 	text-align:center;
-	width:200px; 
+	width:300px; 
   	position:absolute;
-	left: 80px;
+	left: 50px;
 	top:380px;
 	font:normal bold 25px tahoma;
 }
@@ -302,10 +334,10 @@ div#Rxmeters div.value {
 
 #TX-GAIN_control
 {
-	width:200px; 
+	width:300px; 
 	height:140px;
 	position:absolute;
-	left:80px;
+	left:50px;
 	top:530px;
 	font:normal bold 25px tahoma;
 	text-align:center;
@@ -314,7 +346,7 @@ div#Rxmeters div.value {
 #div-TX{
 	position:absolute;
 	left:1450px;
-	top:600px;
+	top:590px;
 	width: 300px;
 	height: 200px;
 }
@@ -351,10 +383,10 @@ div#Rxmeters div.value {
 
 #canBFSPC{
 	position:absolute;
-	left:400px;
+	left:425px;
 	top:320px;
 	width:450px; 
-	height:200px; 
+	height:250px; 
 	background:black;
 	background-color:black;
 	border-radius: 5px 5px 5px 5px;
@@ -366,7 +398,7 @@ div#Rxmeters div.value {
 	left:950px;
 	top:320px;
 	width:450px; 
-	height:200px; 
+	height:250px; 
 	background:black;
 	background-color:black;
 	border-radius: 5px 5px 5px 5px;
@@ -376,22 +408,23 @@ div#Rxmeters div.value {
 #div-mode_menu 
 {
 	position:absolute;
-	left: 400px;
-	top:550px;
-	width: 1000px;
+	left: 950px;
+	top:80px;
+	width: 450px;
+	height:200px;
 }
 
 #div-mode_menu > ul
 {
 	padding:0;
-	width:1000px;
-	text-align:center;
+	margin:0;
+	width:450px;
+	height:200px;
 }
 
 #div-mode_menu > ul > li {
     display: inline-block;
 	font: normal bold 45px tahoma;
-    text-align:center;
 }
 
 #div-mode_menu > ul > li:before{
@@ -402,15 +435,16 @@ div#Rxmeters div.value {
 }
 
 .button_mode{
-	width:190px;
-	height: 60px; 			
+	width:223px;
+	height: 65px; 	
+	text-align:center;	
 }
 
 
 #canRXsmeter{
 	position:absolute;
-	left:1450px;
-	top:100px;
+	left:1475px;
+	top:80px;
 	width:250px; 
 	height:50px; 
 	background:black;
@@ -423,8 +457,8 @@ div#Rxmeters div.value {
 #div-smeterdigitRX
 {
 	position:absolute;
-	left:1450px;
-	top:160px;
+	left:1475px;
+	top:140px;
 	text-align:center;
 	font: normal bold 25px tahoma;
 	width: 250px;

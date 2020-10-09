@@ -54,8 +54,8 @@
 				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="dhz" v=10>▲</li>
 				  <li onmousedown="button_pressed();rotatefreq();" onmouseup="button_unpressed();" class="button_unpressed" digit="uhz" v=1>▲</li>
 				</ul>
-				<ul ondblclick="changeinputfreqstyle(event);" id="freq_disp" onwheel="freq_digit_scroll()">
-				  <input onkeypress="changeinputfreqstyle(event);" onkeydown="validateNumber(event);"/  id="freq_disp_input_text" type="number" minlength="4" maxlength="8" size="10">
+				<ul ondblclick="changeinputfreqstyle(event);document.getElementById('freq_disp_input_text').focus();document.getElementById('freq_disp_input_text').select();" id="freq_disp" onwheel="freq_digit_scroll()">
+				  <input onkeypress="changeinputfreqstyle(event);" onkeydown="validateNumber(event);"/  id="freq_disp_input_text" type="text" minlength="4" maxlength="8" size="10">
 				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="cmhz" v=100000000>0</li>
 				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="dmhz" v=10000000>0</li>
 				  <li class="freq_digit" onmouseenter="select_digit();" onmouseleave="clear_select_digit();" id="umhz" v=1000000>0</li>
@@ -100,6 +100,23 @@
 				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="144300000">2m</li>
 				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="432200000">70cm</li>
 				  <li onmousedown="button_pressed();recall_hambands();" onmouseup="button_unpressed();" class="button_unpressed" v="010000000">WWW</li>
+				</ul>
+			</div>
+			
+			<div id="div-filtershortcut">
+				<ul id="band_but">
+				  <li onclick="togle_li();setaudiofilter();" class="button_pressed" lichecked="" fq="0" fg="0" ft="highshelf" frq="22000">None</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="4400">LP 4.4k</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="3300">LP 3.3k</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="2700">LP 2.7k</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="2100">LP 2.1k</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="0" fg="-20" ft="highshelf" frq="1000">LP 1.0k</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="200">BP 200hz</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="300">BP 300hz</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="500">BP 500hz</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="800">BP 800hz</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" fq="50" fg="-100" ft="bandpass" frq="1000">BP 1khz</li>
+				  <li onclick="togle_li();setaudiofilter();" class="button_unpressed" >Custom</li>
 				</ul>
 			</div>
 			

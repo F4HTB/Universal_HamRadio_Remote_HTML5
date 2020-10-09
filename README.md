@@ -44,3 +44,20 @@ add in /etc/rc.local the command to run at startup:<br>
 
 sudo nano /etc/rc.local<br>
 copy and past: runuser -l pi -c '(cd /home/pi/Universal_HamRadio_Remote_HTML5/ && ./UHRR >> /tmp/uhrr.log) &'<br>
+<br>
+<br>
+![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/README/UHRR_Pict.png?raw=true)
+<br>
+[SERVER]<br>
+SERVER port: the server port<br>
+<br>
+[AUDIO]<br>
+AUDIO outputdevice: output from audio soundcard to the mic input of TRX<br>
+AUDIO inputdevice: int from audio soundcard from the speaker output of TRX<br>
+<br>
+[HAMLIB]<br>
+HAMLIB com port: com port of the car interface<br>
+HAMLIB radio model: hamlib trx model<br>
+HAMLIB auto tx poweroff: set if auto off the trx when it's not used<br>
+<br>
+Possible problem:No //is for get some problemes from the code<br>

@@ -190,25 +190,39 @@ Audio_analyser.getFloatFrequencyData(arrayFFT);
 ctxFFFT.clearRect(0, 0, canvasBFFFT.width, canvasBFFFT.height);
 ctxFFFT.fillStyle = 'rgb(0, 0, 0)';
 ctxFFFT.fillRect(0, 0, canvasBFFFT.width, canvasBFFFT.height);
-var largeurBarre = (canvasBFFFT.width / Audio_analyser.frequencyBinCount);
+var scale_mult = Math.exp(parseInt(document.getElementById("canBFFFT_scale_multdb").value)/100);
+var scale_floor = parseInt(document.getElementById("canBFFFT_scale_floor").value)*scale_mult;
+var scale_hz = Math.exp(parseInt(document.getElementById("canBFFFT_scale_multhz").value)/100);
+var start = (parseInt(document.getElementById("canBFFFT_scale_start").value)*Audio_analyser.frequencyBinCount/100)*scale_hz;
+var largeurBarre = (canvasBFFFT.width / Audio_analyser.frequencyBinCount)*scale_hz;
 var hauteurBarre;
-var x = 0;
+var x = start;
   for(var i = 0; i < Audio_analyser.frequencyBinCount; i++) {
-    hauteurBarre = (arrayFFT[i] + canvasBFFFT.height);
+    hauteurBarre = (arrayFFT[i]*scale_mult + canvasBFFFT.height + scale_floor);
     ctxFFFT.fillStyle = 'rgb(' + Math.floor(hauteurBarre*2+100) + ',50,50)';
-    ctxFFFT.fillRect(x, canvasBFFFT.height-hauteurBarre, largeurBarre, hauteurBarre);
+    ctxFFFT.fillRect(x*scale_hz, canvasBFFFT.height-hauteurBarre, largeurBarre*scale_hz, hauteurBarre);
     x += largeurBarre;
   }
 }
+
+canvasBFFFT.addEventListener('dblclick', function(evt) {
+	document.getElementById("canBFFFT_scale_multdb").value=0;
+	document.getElementById("canBFFFT_scale_floor").value=0;
+	document.getElementById("canBFFFT_scale_multhz").value=0;
+	document.getElementById("canBFFFT_scale_start").value=0;
+}, false);
 
 canvasBFFFT_coord = document.getElementById("canvasBFFFT_coord");
 canvasBFFFT.addEventListener('mousemove', function(evt) {
 	var rect = canvasBFFFT.getBoundingClientRect()
 	scaleX = canvasBFFFT.width / rect.width;    // relationship bitmap vs. element for X
-    scaleY = canvasBFFFT.height / rect.height;  // relationship bitmap vs. element for Y
 	hzperpixel=(AudioRX_sampleRate/2)/rect.width;
 	
-	canvasBFFFT_coord.innerHTML = parseInt((((evt.clientX - rect.left) * scaleX) * (AudioRX_sampleRate/2))/canvasBFFFT.width) + 'hz ,-' + parseInt((evt.clientY - rect.top) * scaleY)+'dB';
+    scaleY = canvasBFFFT.height / rect.height;  // relationship bitmap vs. element for Y
+	var scale_mult = Math.exp(parseInt(document.getElementById("canBFFFT_scale_multdb").value)/100);
+	var scale_floor = parseInt(document.getElementById("canBFFFT_scale_floor").value);
+	
+	canvasBFFFT_coord.innerHTML = parseInt((((evt.clientX - rect.left) * scaleX) * (AudioRX_sampleRate/2))/canvasBFFFT.width) + 'hz ,-' + parseInt(((evt.clientY - rect.top) * scaleY)/(scale_mult) + (scale_floor))+'dB';
 }, false);
 
 canvasBFFFT.addEventListener('click', function(evt) {

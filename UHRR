@@ -156,7 +156,7 @@ class TRXRIG:
 		self.serialport = Hamlib.hamlib_port_parm_serial
 		self.serialport.rate=38400
 		try:
-			# Hamlib.rig_set_debug(Hamlib.RIG_DEBUG_NONE)
+			Hamlib.rig_set_debug(Hamlib.RIG_DEBUG_NONE)
 			self.rig_model = "RIG_MODEL_"+str(config['HAMLIB']['rig_model'])
 			self.rig_pathname = config['HAMLIB']['rig_pathname']
 			self.rig = Hamlib.Rig(Hamlib.__dict__[self.rig_model])  # Look up the model's numerical index in Hamlib's symbol dictionary.
@@ -418,7 +418,7 @@ if __name__ == "__main__":
 		threadloadWavdata.start()
 		
 		CTRX = TRXRIG()
-		CTRX.setPower(1)
+		# CTRX.setPower(1)
 		
 		threadticksTRXRIG = ticksTRXRIG()
 		threadticksTRXRIG.start()

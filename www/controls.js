@@ -1,20 +1,23 @@
 //Extra Generals///////////////////////////////////////////////////////////////////////////
 
-document.addEventListener('contextmenu', event => event.preventDefault());
 function bodyload(){
-	disableScroll();
+	disableSFFC();
 	checkCookie();
 }
 
-function disableScroll() { 
+function disableSFFC() { 
     // Get the current page scroll position 
     scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
     scrollLeft = window.pageXOffset || document.documentElement.scrollLeft, 
   
-        // if any scroll is attempted, set this to the previous value 
-        window.onscroll = function() { 
-            window.scrollTo(scrollLeft, scrollTop); 
-        }; 
+	// if any scroll is attempted, set this to the previous value 
+	window.onscroll = function() { 
+		window.scrollTo(scrollLeft, scrollTop); 
+	}; 
+	
+	document.addEventListener('contextmenu', event => event.preventDefault());
+	document.body.style.overflow = "hidden";
+		
 }
 
 //Generals routines///////////////////////////////////////////////////////////////////////////
@@ -182,7 +185,7 @@ function toggleaudioRX(stat="None"){
 
 canvasBFFFT = document.getElementById("canBFFFT");
 ctxFFFT = canvasBFFFT.getContext("2d");
-
+var Audio_analyser="";
 function drawRXFFT(Audio_analyser){
 Audio_analyser.fftSize = canvasBFFFT.width;
 var arrayFFT = new Float32Array(Audio_analyser.frequencyBinCount);
@@ -214,18 +217,20 @@ canvasBFFFT.addEventListener('dblclick', function(evt) {
 
 canvasBFFFT_coord = document.getElementById("canvasBFFFT_coord");
 canvasBFFFT.addEventListener('mousemove', function(evt) {
-	var rect = canvasBFFFT.getBoundingClientRect()
-	scaleX = canvasBFFFT.width / rect.width;    // relationship bitmap vs. element for X
-	hzperpixel=(AudioRX_sampleRate/2)/rect.width;
-	
-	var scale_hz = Math.exp(parseInt(document.getElementById("canBFFFT_scale_multhz").value)/100);
-	var start = (parseInt(document.getElementById("canBFFFT_scale_start").value)*Audio_analyser.frequencyBinCount/100)*scale_hz;
-	
-    scaleY = canvasBFFFT.height / rect.height;  // relationship bitmap vs. element for Y
-	var scale_mult = Math.exp(parseInt(document.getElementById("canBFFFT_scale_multdb").value)/100);
-	var scale_floor = parseInt(document.getElementById("canBFFFT_scale_floor").value);
-	
-	canvasBFFFT_coord.innerHTML = parseInt(((((evt.clientX - rect.left)/(scale_hz*scale_hz) * scaleX ) - (start/scale_hz))* (AudioRX_sampleRate/2))/canvasBFFFT.width) + 'hz ,-' + parseInt(((evt.clientY - rect.top) * scaleY)/(scale_mult) + (scale_floor))+'dB';
+	if(Audio_analyser){
+		var rect = canvasBFFFT.getBoundingClientRect()
+		scaleX = canvasBFFFT.width / rect.width;    // relationship bitmap vs. element for X
+		hzperpixel=(AudioRX_sampleRate/2)/rect.width;
+		
+		var scale_hz = Math.exp(parseInt(document.getElementById("canBFFFT_scale_multhz").value)/100);
+		var start = (parseInt(document.getElementById("canBFFFT_scale_start").value)*Audio_analyser.frequencyBinCount/100)*scale_hz;
+		
+		scaleY = canvasBFFFT.height / rect.height;  // relationship bitmap vs. element for Y
+		var scale_mult = Math.exp(parseInt(document.getElementById("canBFFFT_scale_multdb").value)/100);
+		var scale_floor = parseInt(document.getElementById("canBFFFT_scale_floor").value);
+		
+		canvasBFFFT_coord.innerHTML = parseInt(((((evt.clientX - rect.left)/(scale_hz*scale_hz) * scaleX ) - (start/scale_hz))* (AudioRX_sampleRate/2))/canvasBFFFT.width) + 'hz ,-' + parseInt(((evt.clientY - rect.top) * scaleY)/(scale_mult) + (scale_floor))+'dB';
+	}
 }, false);
 
 canvasBFFFT.addEventListener('mouseenter', function(evt) {

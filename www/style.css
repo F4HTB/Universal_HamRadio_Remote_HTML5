@@ -7,7 +7,7 @@ body {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	overflow: hidden;
+	/* overflow: hidden; */
 }
 
 #ombre-body{
@@ -418,34 +418,64 @@ div#Rxmeters div.value {
 	border-radius: 5px 5px 5px 5px;
 	box-shadow:0px 2px 2px 0px rgba(0, 0, 0, 1) inset,0px 2px 2px 0px rgba(255, 255, 255, 1);
 }
+.slider-wrapper{
+	-webkit-appearance: none;
+	height: 0px;
+	border-radius: 5px;
+	outline: none;
+	opacity: 0.4;
+	-webkit-transition: .2s;
+	transition: opacity .2s;
+	background: #FF0000;
+}
+
+.slider-wrapper:hover {
+	opacity: 1;
+}
+
+.slider-wrapper:hover::-moz-range-thumb{
+	opacity: 1;
+	height: 10px;
+	width: 20px;
+}
+
+.slider-wrapper::-webkit-slider-thumb{
+	background: #FF0000;
+}	
+
+.slider-wrapper::-moz-range-thumb{
+	background: #FF0000;
+	height: 4px;
+	width: 4px;
+}
 
 .slider-wrapper_floor{
 	width: 250px;
-	height: 20px;
+	height: 0px;
 	margin: 0;
 	transform-origin: 75px 75px;
 	transform: rotate(-90deg);
 	position:absolute;
 	left: 940px;
-	top: 422px;
+	top: 420px;
 	z-index: 2;
 }
 
 .slider-wrapper_multdb{
 	width: 250px;
-	height: 20px;
+	height: 0px;
 	margin: 0;
 	transform-origin: 75px 75px;
 	transform: rotate(+90deg);
 	position:absolute;
 	left: 1260px;
-	top: 322px;
+	top: 320px;
 	z-index: 2;
 }
 
 .slider-wrapper_start{
 	width: 450px;
-	height: 20px;
+	height: 0px;
 	margin: 0;
 	transform-origin: 75px 75px;
 	transform: rotate(+180deg);
@@ -457,11 +487,11 @@ div#Rxmeters div.value {
 
 .slider-wrapper_multhz{
 	width: 450px;
-	height: 20px;
+	height: 0px;
 	margin: 0;
 	position:absolute;
 	left: 950px;
-	top: 315px;
+	top: 310px;
 	z-index: 2;
 }
 

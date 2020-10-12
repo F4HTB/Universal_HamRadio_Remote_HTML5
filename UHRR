@@ -390,9 +390,9 @@ class ConfigHandler(tornado.web.RequestHandler):
 		self.write("""HAMLIB radio model:<select name="HAMLIB.rig_rate">""")
 		if(config['HAMLIB']['rig_rate']!="null"):
 			self.write("""<option value="""+config['HAMLIB']['rig_rate']+""" selected>"""+config['HAMLIB']['rig_rate']+"""</option>""")
-		self.write("""<option value=""38400"">""38400""</option>""")
-		self.write("""<option value=""9600"">""9600""</option>""")
-		self.write("""<option value=""4800"">""4800""</option>""")
+		self.write("""<option value=38400>38400</option>""")
+		self.write("""<option value=9600>9600</option>""")
+		self.write("""<option value=4800>4800</option>""")
 		self.write("""</select><br/><br/>""")
 		
 		self.write("""HAMLIB auto tx poweroff:<select name="HAMLIB.TXautopower">""")
@@ -413,7 +413,7 @@ class ConfigHandler(tornado.web.RequestHandler):
 				config[s][o]=v
 		with open('UHRR.conf', 'w') as configfile:
 			config.write(configfile)
-		self.write("""<html><head><script>window.setTimeout(function() {window.location.href = 'https://'+window.location.hostname+':'+ '"""+config['SERVER']['port']+"""';}, 10000);</script><head><body>your are redirect automaticly...please wait...<br><img width="40px" height=40px" src="img/spinner.gif"></body></html>""")
+		self.write("""<html><head><script>window.setTimeout(function() {window.location.href = 'https://'+window.location.hostname+':'+ '"""+config['SERVER']['port']+"""';}, 10000);</script><head><body>your are redirect automaticly...please wait...<br><img width="40px" height=40px" src="../img/spinner.gif"></body></html>""")
 		self.flush() 
 		time.sleep(2)
 		os.system("sleep 2;./UHRR &")

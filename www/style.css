@@ -7,7 +7,7 @@ body {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	/* overflow: hidden; */
+	overflow: hidden;
 }
 
 #ombre-body{
@@ -127,7 +127,7 @@ overflow: hidden;
     display: inline-block;
 	font:normal bold 25px tahoma;
     text-align:center;
-	width:97px;
+	width:32%;
 }
 
 #div-customfilter
@@ -164,7 +164,7 @@ overflow: hidden;
     display: inline-block;
 	font:normal bold 25px tahoma;
     text-align:center;
-	width:147px;
+	width:32%;
 }
 
 
@@ -179,9 +179,9 @@ overflow: hidden;
 
 #div-freq > ul > li {
     display: inline-block;
-	font:normal bold 45px tahoma;
+	font:normal bold 37px tahoma;
     text-align:center;
-	width:37px;
+	width:8%;
 }
 
 #freq_disp{
@@ -234,6 +234,7 @@ overflow: hidden;
     text-align:center;
 	margin-top:5px;
 	margin-bottom:5px;
+	width:8%;
 }
 
 #freq_but > ul > li:before{
@@ -243,6 +244,7 @@ overflow: hidden;
     height: 100%;  	
 	margin-top:5px;
 	margin-bottom:5px;
+	width:8%;
 }
 
 #div-scoketscontrols 
@@ -365,7 +367,7 @@ div#Rxmeters div.value {
 {
 	text-align:center;
 	font:normal bold 90px tahoma;
-	height:130px;
+	height:140px;
 	width:100%;
 	display: inline-block;
 }
@@ -373,6 +375,7 @@ div#Rxmeters div.value {
 #TX-record_record_opus
 {
 	font:normal bold 10px tahoma;
+	text-align:center;
 }
 
 #TX-record-lock
@@ -466,6 +469,10 @@ div#Rxmeters div.value {
 	position:absolute;
 	top:600px;
 	left:950px;
+	z-index: 4;
+	display: none;
+	margin:0px;
+	padding:0px;
 }
 
 #div-mode_menu 

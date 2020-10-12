@@ -1,21 +1,21 @@
 //Extra Generals///////////////////////////////////////////////////////////////////////////
 
-// document.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener('contextmenu', event => event.preventDefault());
 function bodyload(){
-	// disableScroll();
+	disableScroll();
 	checkCookie();
 }
 
-// function disableScroll() { 
-    // // Get the current page scroll position 
-    // scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
-    // scrollLeft = window.pageXOffset || document.documentElement.scrollLeft, 
+function disableScroll() { 
+    // Get the current page scroll position 
+    scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
+    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft, 
   
-        // // if any scroll is attempted, set this to the previous value 
-        // window.onscroll = function() { 
-            // window.scrollTo(scrollLeft, scrollTop); 
-        // }; 
-// }
+        // if any scroll is attempted, set this to the previous value 
+        window.onscroll = function() { 
+            window.scrollTo(scrollLeft, scrollTop); 
+        }; 
+}
 
 //Generals routines///////////////////////////////////////////////////////////////////////////
 var poweron = false;
@@ -226,6 +226,14 @@ canvasBFFFT.addEventListener('mousemove', function(evt) {
 	var scale_floor = parseInt(document.getElementById("canBFFFT_scale_floor").value);
 	
 	canvasBFFFT_coord.innerHTML = parseInt(((((evt.clientX - rect.left)/(scale_hz*scale_hz) * scaleX ) - (start/scale_hz))* (AudioRX_sampleRate/2))/canvasBFFFT.width) + 'hz ,-' + parseInt(((evt.clientY - rect.top) * scaleY)/(scale_mult) + (scale_floor))+'dB';
+}, false);
+
+canvasBFFFT.addEventListener('mouseenter', function(evt) {
+	canvasBFFFT_coord.style.display="block";
+}, false);
+
+canvasBFFFT.addEventListener('mouseout', function(evt) {
+	canvasBFFFT_coord.style.display="none";
 }, false);
 
 canvasBFFFT.addEventListener('click', function(evt) {

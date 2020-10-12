@@ -11,12 +11,11 @@ import threading
 import time
 import numpy 
 import gc
-import Hamlib
 from opus.decoder import Decoder as OpusDecoder
 import datetime
 import configparser
 import sys
-
+import Hamlib
 
 ############ Global variables ##################################
 CTRX=None
@@ -154,7 +153,7 @@ class TRXRIG:
 		self.infos = {}
 		self.infos["PTT"]=False
 		self.serialport = Hamlib.hamlib_port_parm_serial
-		self.serialport.rate=38400
+		self.serialport.rate=config['HAMLIB']['rig_rate']
 		try:
 			Hamlib.rig_set_debug(Hamlib.RIG_DEBUG_NONE)
 			self.rig_model = "RIG_MODEL_"+str(config['HAMLIB']['rig_model'])
@@ -164,7 +163,7 @@ class TRXRIG:
 			self.rig.set_conf("retry", config['HAMLIB']['retry'])
 			self.rig.open()
 		except:
-			logging.error("Could not open a communication channel to the rig via Hamlib!")
+			print("Could not open a communication channel to the rig via Hamlib!")
 			
 		self.getvfo()
 		self.getFreq()
@@ -181,7 +180,7 @@ class TRXRIG:
 		try:
 			self.infos["VFO"] = (self.rig.get_vfo())
 		except:
-			logging.error("Could not obtain the current VFO via Hamlib!")
+			print("Could not obtain the current VFO via Hamlib!")
 		return self.infos["VFO"]
 
 	def setFreq(self,frequency):
@@ -189,14 +188,14 @@ class TRXRIG:
 			self.rig.set_freq(Hamlib.RIG_VFO_CURR, float(frequency))
 			self.getFreq()
 		except:
-			logging.error("Could not set the frequency via Hamlib!")
+			print("Could not set the frequency via Hamlib!")
 		return self.infos["FREQ"]
 		
 	def getFreq(self):
 		try:
 			self.infos["FREQ"] = (int(self.rig.get_freq()))
 		except:
-			logging.error("Could not obtain the current frequency via Hamlib!")
+			print("Could not obtain the current frequency via Hamlib!")
 		return self.infos["FREQ"]
 		
 	def setMode(self,MODE):
@@ -205,7 +204,7 @@ class TRXRIG:
 			self.rig.set_mode(Hamlib.rig_parse_mode(MODE))
 			self.getMode()
 		except:
-			logging.error("Could not set the mode via Hamlib!")
+			print("Could not set the mode via Hamlib!")
 		return self.infos["MODE"]
 		
 	def getMode(self):
@@ -214,15 +213,16 @@ class TRXRIG:
 			self.infos["MODE"] = Hamlib.rig_strrmode(mode).upper()
 			self.infos["WIDTH"] = width
 		except:
-			logging.error("Could not obtain the current Mode via Hamlib!")
+			print("Could not obtain the current Mode via Hamlib!")
 		return self.infos["MODE"]
+		return ""
 
 	def getStrgLVL(self):
 		try:
 			self.infos["StrgLVLi"] = self.rig.get_level_i(Hamlib.RIG_LEVEL_STRENGTH)
 			self.infos["StrgLVL"] = self.parsedbtospoint(self.infos["StrgLVLi"])
 		except:
-			logging.error("Could not obtain the current Strength signal RX level via Hamlib!")
+			print("Could not obtain the current Strength signal RX level via Hamlib!")
 		return self.infos["StrgLVL"]
 		
 	def setPTT(self,status):
@@ -234,7 +234,7 @@ class TRXRIG:
 				self.rig.set_ptt(Hamlib.RIG_VFO_CURR,Hamlib.RIG_PTT_OFF)
 				self.infos["PTT"]=False
 		except:
-			logging.error("Could not set the mode via Hamlib!")
+			print("Could not set the mode via Hamlib!")
 		return self.infos["PTT"]
 		
 	def getPTT(self,status):
@@ -248,7 +248,7 @@ class TRXRIG:
 				self.rig.set_powerstat(Hamlib.RIG_POWER_OFF)
 			self.infos["powerstat"] = status
 		except:
-			logging.error("Could not set power status via Hamlib!")
+			print("Could not set power status via Hamlib!")
 		return self.infos["powerstat"]
 
 class ticksTRXRIG(threading.Thread):
@@ -387,6 +387,14 @@ class ConfigHandler(tornado.web.RequestHandler):
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
 		self.write("""</select><br/><br/>""")
 		
+		self.write("""HAMLIB radio model:<select name="HAMLIB.rig_rate">""")
+		if(config['HAMLIB']['rig_rate']!="null"):
+			self.write("""<option value="""+config['HAMLIB']['rig_rate']+""" selected>"""+config['HAMLIB']['rig_rate']+"""</option>""")
+		self.write("""<option value=""38400"">""38400""</option>""")
+		self.write("""<option value=""9600"">""9600""</option>""")
+		self.write("""<option value=""4800"">""4800""</option>""")
+		self.write("""</select><br/><br/>""")
+		
 		self.write("""HAMLIB auto tx poweroff:<select name="HAMLIB.TXautopower">""")
 		if(config['HAMLIB']['TXautopower']!="null"):
 			self.write("""<option value="""+config['HAMLIB']['TXautopower']+""" selected>"""+config['HAMLIB']['TXautopower']+"""</option>""")
@@ -405,7 +413,7 @@ class ConfigHandler(tornado.web.RequestHandler):
 				config[s][o]=v
 		with open('UHRR.conf', 'w') as configfile:
 			config.write(configfile)
-		self.write("""<html><head><script>window.setTimeout(function() {window.location.href = 'https://'+window.location.hostname+':'+ '"""+config['SERVER']['port']+"""';}, 10000);</script><head><body>your are redirect automaticly...please wait...</body></html>""")
+		self.write("""<html><head><script>window.setTimeout(function() {window.location.href = 'https://'+window.location.hostname+':'+ '"""+config['SERVER']['port']+"""';}, 10000);</script><head><body>your are redirect automaticly...please wait...<br><img width="40px" height=40px" src="img/spinner.gif"></body></html>""")
 		self.flush() 
 		time.sleep(2)
 		os.system("sleep 2;./UHRR &")
@@ -418,7 +426,7 @@ if __name__ == "__main__":
 		threadloadWavdata.start()
 		
 		CTRX = TRXRIG()
-		# CTRX.setPower(1)
+		CTRX.setPower(1)
 		
 		threadticksTRXRIG = ticksTRXRIG()
 		threadticksTRXRIG.start()

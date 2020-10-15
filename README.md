@@ -65,3 +65,18 @@ HAMLIB radio model: hamlib trx model<br>
 HAMLIB auto tx poweroff: set if auto off the trx when it's not used<br>
 <br>
 Possible problem:No //is for get some problemes from the code<br>
+<br>
+<br>
+Other optional to get more function is use Hamlib last version:<br>
+<br>
+git clone https://github.com/Hamlib/Hamlib<br>
+cd Hamlib<br>
+./bootstrap<br>
+./configure --with-python-binding PYTHON=$(which python3)<br>
+make<br>
+sudo make install<br>
+cd bindings<br>
+make<br>
+sudo make install<br>
+<br>
+Special thanks to Mike W9MDB! and all the hamlib team for all the staf<br>

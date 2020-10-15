@@ -152,6 +152,7 @@ class TRXRIG:
 		self.spoints = {"0":-54, "1":-48, "2":-42, "3":-36, "4":-30, "5":-24, "6":-18, "7":-12, "8":-6, "9":0, "10":10, "20":20, "30":30, "40":40, "50":50, "60":60}
 		self.infos = {}
 		self.infos["PTT"]=False
+		self.infos["powerstat"]=False
 		self.serialport = Hamlib.hamlib_port_parm_serial
 		self.serialport.rate=config['HAMLIB']['rig_rate']
 		try:
@@ -164,7 +165,8 @@ class TRXRIG:
 			self.rig.open()
 		except:
 			print("Could not open a communication channel to the rig via Hamlib!")
-			
+		
+		self.setPower(1)
 		self.getvfo()
 		self.getFreq()
 		self.getMode()
@@ -258,7 +260,8 @@ class ticksTRXRIG(threading.Thread):
 
 	def run(self):
 		while True:
-			CTRX.getStrgLVL()
+			if CTRX.infos["powerstat"]:
+				CTRX.getStrgLVL()
 			time.sleep(0.1)
 
 class ControlTRX(tornado.websocket.WebSocketHandler):
@@ -288,6 +291,7 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 		
 	@tornado.gen.coroutine
 	def on_message(self, data) :
+		global LastPing
 		if bool(config['CTRL']['debug']):
 			print(data)
 		
@@ -300,7 +304,7 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 		if(action == "PING"):
 				self.write_message("PONG")
 		elif(action == "getFreq"):
-			yield self.send_to_all_clients("getFreq:"+str(CTRX.getFreq())) #CTRX()[data]()
+			yield self.send_to_all_clients("getFreq:"+str(CTRX.getFreq()))
 		elif(action == "setFreq"):
 			yield self.send_to_all_clients("getFreq:"+str(CTRX.setFreq(datato)))
 		elif(action == "getMode"):
@@ -308,7 +312,9 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 		elif(action == "setMode"):
 			yield self.send_to_all_clients("getMode:"+str(CTRX.setMode(datato)))
 		elif(action == "setPTT"):
-			yield self.send_to_all_clients("getPTT:"+str(CTRX.setPTT(datato)))			
+			yield self.send_to_all_clients("getPTT:"+str(CTRX.setPTT(datato)))	
+
+		LastPing = time.time();
 			
 	def on_close(self):
 		if self in ControlTRXHandlerClients:
@@ -325,7 +331,7 @@ def timeoutTRXshutdown():
 class threadtimeoutTRXshutdown(threading.Thread):
 
 	def __init__(self):
-		Thread.__init__(self)
+		threading.Thread.__init__(self)
 
 	def run(self):
 		while True:
@@ -395,9 +401,9 @@ class ConfigHandler(tornado.web.RequestHandler):
 		self.write("""<option value=4800>4800</option>""")
 		self.write("""</select><br/><br/>""")
 		
-		self.write("""HAMLIB auto tx poweroff:<select name="HAMLIB.TXautopower">""")
-		if(config['HAMLIB']['TXautopower']!="null"):
-			self.write("""<option value="""+config['HAMLIB']['TXautopower']+""" selected>"""+config['HAMLIB']['TXautopower']+"""</option>""")
+		self.write("""HAMLIB auto tx poweroff:<select name="HAMLIB.trxautopower">""")
+		if(config['HAMLIB']['trxautopower']!="null"):
+			self.write("""<option value="""+config['HAMLIB']['trxautopower']+""" selected>"""+config['HAMLIB']['trxautopower']+"""</option>""")
 		self.write("""<option value=\"True\">\"True\"</option>""")
 		self.write("""<option value=\"False\">\"False\"</option>""")
 		self.write("""</select><br/><br/>""")
@@ -426,12 +432,11 @@ if __name__ == "__main__":
 		threadloadWavdata.start()
 		
 		CTRX = TRXRIG()
-		CTRX.setPower(1)
 		
 		threadticksTRXRIG = ticksTRXRIG()
 		threadticksTRXRIG.start()
 		
-		if(config['HAMLIB']['TXautopower']==True):
+		if(config['HAMLIB']['trxautopower']=="True"):
 			threadsurveilTRX = threadtimeoutTRXshutdown()
 			threadsurveilTRX.start()
 		

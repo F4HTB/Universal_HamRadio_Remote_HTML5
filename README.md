@@ -14,7 +14,7 @@ You need:
 - a cat interface.
 - a circuit making it possible to adapt the audio levels between the microphone input, the speaker output and the sound card.
 
-You can access it at https://UHRR.local:8888/
+Assuming your raspberry pi hostname is set to UHRR, you can access it at https://UHRR.local:8888/
 Note the HTTP <b> S </b>.
 You can configure all of this by logging into https://UHRR.local:8888/CONFIG
 If the original configuration is not good, this will automatically switch to the configuration page.

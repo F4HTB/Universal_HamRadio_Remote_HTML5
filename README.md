@@ -8,7 +8,8 @@ This project is more oriented for speaking or CW.<br>
 Caution:<br>
 It is designed for Raspberry Pi OS (32-bit) Lite (actualy in version "Minimal image based on Debian Buster").<br>
 Use only if it is legal in your country.<br>
-It is for remote only, not designed for use on the same camputer as an interface.<br>
+It is for remote only, not designed for use on the same computer as an interface but can maybe work.<br>
+Please, dont send issue outside they condition of use.<br>
 <br>
 ![alt text](README/UHRR_Pict.png)
 

@@ -22,7 +22,7 @@ If the original configuration is not good, this will automatically switch to the
 Here are some pictures concerning the implementation:
 
 
-![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/README/func_princ.png?raw=true)
+![alt text](README/func_princ.png?raw=true)
 
 ![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/README/sound_diagram.png?raw=true)
 

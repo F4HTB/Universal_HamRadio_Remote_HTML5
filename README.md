@@ -1,10 +1,14 @@
 # Universal_HamRadio_Remote_HTML5
 Universal HamRadio Remote HTML5 interface.<br>
-It is designed for Raspberry Pi OS (32-bit) Lite (actualy in version "Minimal image based on Debian Buster").<br>
 This is an implementation of python server and html5 function to get an webbrowsable interface to use your TRX in RX and TX.<br>
-You can use basis and some advanced functions of your radio.
-You use your speaker and microphone of your computer to communication.
-This project is more oriented for speaking or CW.
+You can use basis and some advanced functions of your radio.<br>
+You use your speaker and microphone of your computer to communication.<br>
+This project is more oriented for speaking or CW.<br>
+<br>
+Caution:<br>
+It is designed for Raspberry Pi OS (32-bit) Lite (actualy in version "Minimal image based on Debian Buster").<br>
+Use only if it is legal in your country.<br>
+It is for remote only, not designed for use on the same camputer as an interface.<br>
 <br>
 ![alt text](README/UHRR_Pict.png)
 

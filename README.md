@@ -82,4 +82,6 @@ make
 sudo make install
 
 ```
-Special thanks to Mike W9MDB! and all the hamlib team for all the staf<br>
+Special thanks to :
+-Mike W9MDB! and all the hamlib team for all the staf
+-Xylle for contribution

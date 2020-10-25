@@ -5,7 +5,7 @@ You can use basis and some advanced functions of your radio.
 You use your speaker and microphone of your computer to communication.
 This project is more oriented for speaking or CW.
 <br>
-![alt text](README/UHRR_Pict.png?raw=true)
+![alt text](README/UHRR_Pict.png)
 
 This utility is used to set up an amateur radio station remotely via a web browser.
 

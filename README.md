@@ -51,7 +51,7 @@ sudo nano /etc/rc.local<br>
 copy and past: runuser -l pi -c '(cd /home/pi/Universal_HamRadio_Remote_HTML5/ && ./UHRR >> /tmp/uhrr.log) &'<br>
 <br>
 <br>
-![alt text](https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/blob/master/README/UHRR_conf_Pict.png?raw=true)
+![alt text](README/UHRR_conf_Pict.png)
 <br>
 [SERVER]<br>
 SERVER port: the server port<br>

@@ -1,4 +1,5 @@
 # Universal_HamRadio_Remote_HTML5
+V1
 Universal HamRadio Remote HTML5 interface.<br>
 This is an implementation of python server and html5 function to get an webbrowsable interface to use your TRX in RX and TX.<br>
 You can use basis and some advanced functions of your radio.

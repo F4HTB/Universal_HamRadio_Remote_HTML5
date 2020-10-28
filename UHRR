@@ -393,7 +393,7 @@ class ConfigHandler(tornado.web.RequestHandler):
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
 		self.write("""</select><br/><br/>""")
 		
-		self.write("""HAMLIB radio model:<select name="HAMLIB.rig_rate">""")
+		self.write("""HAMLIB radio rate:<select name="HAMLIB.rig_rate">""")
 		if(config['HAMLIB']['rig_rate']!="null"):
 			self.write("""<option value="""+config['HAMLIB']['rig_rate']+""" selected>"""+config['HAMLIB']['rig_rate']+"""</option>""")
                 # https://github.com/Hamlib/Hamlib/blob/master/src/serial.c shows the supported baud rates:

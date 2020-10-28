@@ -360,7 +360,7 @@ class ConfigHandler(tornado.web.RequestHandler):
 		rig_models=[s[10:] for s in dir(Hamlib) if "RIG_MODEL_" in s]
 		self.write("""<html><form method="POST" action="/CONFIG">""")
 		self.write("""[SERVER]<br/><br/>""")
-		self.write("""SERVER port:<input type="text" name="SERVER.port" value="""+config['SERVER']['port']+"""><br/><br/>""")
+		self.write("""SERVER TCP/IP port:<input type="text" name="SERVER.port" value="""+config['SERVER']['port']+"""><br/><br/>""")
 		self.write("""If you whant to change certfile and keyfile, replace "UHRH.crt" and "UHRH.key" in the boot folder, and when the pi boot, it will use those files to start http ssl.<br/><br/>""")
 
 		self.write("""[AUDIO]<br/><br/>""")
@@ -428,7 +428,7 @@ class ConfigHandler(tornado.web.RequestHandler):
 				config[s][o]=v
 		with open('UHRR.conf', 'w') as configfile:
 			config.write(configfile)
-		self.write("""<html><head><script>window.setTimeout(function() {window.location.href = 'https://'+window.location.hostname+':'+ '"""+config['SERVER']['port']+"""';}, 10000);</script><head><body>your are redirect automaticly...please wait...<br><img width="40px" height=40px" src="../img/spinner.gif"></body></html>""")
+		self.write("""<html><head><script>window.setTimeout(function() {window.location.href = 'https://'+window.location.hostname+':'+ '"""+config['SERVER']['port']+"""';}, 10000);</script><head><body>You will be redirected automatically. Please wait...<br><img width="40px" height=40px" src="../img/spinner.gif"></body></html>""")
 		self.flush() 
 		time.sleep(2)
 		os.system("sleep 2;./UHRR &")
@@ -472,5 +472,5 @@ if __name__ == "__main__":
 	"keyfile": os.path.join(config['SERVER']['keyfile']),
 	})
 	http_server.listen(int(config['SERVER']['port']))
-	print('http server started')
+	print('HTTP server started.')
 	tornado.ioloop.IOLoop.instance().start()

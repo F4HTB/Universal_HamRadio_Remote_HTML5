@@ -379,7 +379,7 @@ class ConfigHandler(tornado.web.RequestHandler):
 		self.write("""</select><br/><br/>""")
 
 		self.write("""[HAMLIB]<br/><br/>""")
-		self.write("""HAMLIB com port:<select name="HAMLIB.rig_pathname">""")
+		self.write("""HAMLIB serial port:<select name="HAMLIB.rig_pathname">""")
 		if(config['HAMLIB']['rig_pathname']!="null"):
 			self.write("""<option value="""+config['HAMLIB']['rig_pathname']+""" selected>"""+config['HAMLIB']['rig_pathname']+"""</option>""")
 		for c in comports:

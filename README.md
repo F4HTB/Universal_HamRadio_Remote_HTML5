@@ -88,8 +88,13 @@ make
 sudo make install
 
 ```
+And finaly you can run with:
+```
+PYTHONPATH=/usr/local/lib/python3.7/site-packages:$PYTHONPATH ./UHRR
+```
+
 Special thanks to :
 
 -Mike W9MDB! and all the hamlib team for all the staf
 
--Xylle for contribution
+-All contributors :)

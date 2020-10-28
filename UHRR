@@ -379,7 +379,7 @@ class ConfigHandler(tornado.web.RequestHandler):
 		self.write("""</select><br/><br/>""")
 
 		self.write("""[HAMLIB]<br/><br/>""")
-		self.write("""HAMLIB com port:<select name="HAMLIB.rig_pathname">""")
+		self.write("""HAMLIB serial port:<select name="HAMLIB.rig_pathname">""")
 		if(config['HAMLIB']['rig_pathname']!="null"):
 			self.write("""<option value="""+config['HAMLIB']['rig_pathname']+""" selected>"""+config['HAMLIB']['rig_pathname']+"""</option>""")
 		for c in comports:
@@ -393,12 +393,21 @@ class ConfigHandler(tornado.web.RequestHandler):
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
 		self.write("""</select><br/><br/>""")
 		
-		self.write("""HAMLIB radio model:<select name="HAMLIB.rig_rate">""")
+		self.write("""HAMLIB radio rate:<select name="HAMLIB.rig_rate">""")
 		if(config['HAMLIB']['rig_rate']!="null"):
 			self.write("""<option value="""+config['HAMLIB']['rig_rate']+""" selected>"""+config['HAMLIB']['rig_rate']+"""</option>""")
+		self.write("""<option value=230400>230400</option>""")
+		self.write("""<option value=115200>115200</option>""")
+		self.write("""<option value=57600>57600</option>""")
 		self.write("""<option value=38400>38400</option>""")
+		self.write("""<option value=19200>19200</option>""")
 		self.write("""<option value=9600>9600</option>""")
 		self.write("""<option value=4800>4800</option>""")
+		self.write("""<option value=2400>2400</option>""")
+		self.write("""<option value=1200>1200</option>""")
+		self.write("""<option value=600>600</option>""")
+		self.write("""<option value=300>300</option>""")
+		self.write("""<option value=150>150</option>""")
 		self.write("""</select><br/><br/>""")
 		
 		self.write("""HAMLIB auto tx poweroff:<select name="HAMLIB.trxautopower">""")

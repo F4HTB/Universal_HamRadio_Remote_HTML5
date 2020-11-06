@@ -1,15 +1,15 @@
 # Universal_HamRadio_Remote_HTML5
 Universal HamRadio Remote HTML5 interface.<br>
-This is an implementation of python server and html5 function to get an webbrowsable interface to use your TRX in RX and TX.<br>
-You can use basis and some advanced functions of your radio.<br>
-You use your speaker and microphone of your computer to communication.<br>
-This project is more oriented for speaking or CW.<br>
+This is an implementation of a python server and HTML5 frontend to provide a web interface to use your TRX for both RX and TX.<br>
+You can use basic and some advanced functions of your radio.<br>
+You use the speaker and microphone of your computer to communicate.<br>
+This project is more oriented for voice (phone) or CW.<br>
 <br>
 Caution:<br>
-It is designed for Raspberry Pi OS (32-bit) Lite (actualy in version "Minimal image based on Debian Buster").<br>
+It is designed for Raspberry Pi OS (32-bit) Lite (actually "Minimal image based on Debian Buster").<br>
 Use only if it is legal in your country.<br>
-It is for remote only, not designed for use on the same computer as an interface but can maybe work.<br>
-Please, dont send issue outside they condition of use.<br>
+It is intended for remote use, it is not designed for use on the same computer as an interface even though it will likely work.<br>
+Please don't raise an issue for anything outside of the intended design.<br>
 <br>
 ![alt text](README/UHRR_Pict.png)
 
@@ -23,9 +23,7 @@ You need:
 Assuming your raspberry pi hostname is set to UHRR, you can access it at https://UHRR.local:8888/
 Note the HTTP <b> S </b>.
 You can configure all of this by logging into https://UHRR.local:8888/CONFIG
-If the original configuration is not good, this will automatically switch to the configuration page.
-
-Here are some pictures concerning the implementation:
+If the original configuration is invalid or missing, this will automatically switch to the configuration page.
 
 
 ![alt text](README/func_princ.png)
@@ -34,7 +32,7 @@ Here are some pictures concerning the implementation:
 
 ## Requirements:
 ```
-sudo apt-get install -y git python3 python3-pip3 python3-libhamlib2 python3-numpy python3-tornado python3-serial python3-pyaudio
+sudo apt-get install -y git python3 python3-pip python3-libhamlib2 python3-numpy python3-tornado python3-serial python3-pyaudio
 sudo pip3 install pyalsaaudio
 ```
 
@@ -65,17 +63,17 @@ SERVER port: the server port
 
 [AUDIO]
 AUDIO outputdevice: output from audio soundcard to the mic input of TRX
-AUDIO inputdevice: int from audio soundcard from the speaker output of TRX
+AUDIO inputdevice: input from audio soundcard from the speaker output of TRX
 
 [HAMLIB]
-HAMLIB com port: com port of the car interface
+HAMLIB com port: com port of the CAT interface
 HAMLIB radio model: hamlib trx model
-HAMLIB auto tx poweroff: set if auto off the trx when it's not used
+HAMLIB auto tx poweroff: set to auto power off the trx when it's not in use
 ```
 ## Possible problem
 No //is for get some problemes from the code
 ## Other optional
-to get more function is use Hamlib last version
+To get more functionality you can use the latest version of HamLib
 ```
 git clone https://github.com/Hamlib/Hamlib
 cd Hamlib
@@ -88,13 +86,13 @@ make
 sudo make install
 
 ```
-And finaly you can run with:
+And finally now run with:
 ```
 PYTHONPATH=/usr/local/lib/python3.7/site-packages:$PYTHONPATH ./UHRR
 ```
 
 Special thanks to :
 
--Mike W9MDB! and all the hamlib team for all the staf
+-Mike W9MDB! and all the hamlib team for all their hard work
 
 -All contributors :)

@@ -538,7 +538,7 @@ function checkCookie() {
 	get_freqfromcokkies();
 }
 
-function get_freqfromcokkies(){
+function get_freqfromcokkies(itemselected=""){
 	var freqs=getCookie("freqs").replace("//", '/').split("/").sort();
 	var x = document.getElementById("selectpersonalfrequency");
 	var length = x.options.length;
@@ -553,6 +553,7 @@ function get_freqfromcokkies(){
 			mode=freqs[i].split(",")[1]
 			option.text = parseInt(freq)+" in "+mode;
 			option.value = freqs[i];
+			if(option.value == itemselected){option.selected = true;}
 			x.add(option); 
 		}
 	}
@@ -572,9 +573,13 @@ function save_freqtocokkies(){
 	document.getElementById("uhz").innerHTML
 	);
 	var mode=get_actualmode();
-	var freqs=getCookie("freqs").replace("//", '/')+freq.toString()+","+mode+"/";
-	setCookie("freqs", freqs, 180);
-	get_freqfromcokkies();
+	var freqs=getCookie("freqs").replace("//", '/');
+	var val=freq.toString()+","+mode;
+	if(!freqs.includes(val)){
+		freqs = freqs +val+"/";
+		setCookie("freqs", freqs, 180);
+		get_freqfromcokkies(val);
+	}
 }
 
 function delete_freqfromcokkies(){

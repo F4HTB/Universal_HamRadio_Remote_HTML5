@@ -32,8 +32,7 @@ class loadWavdata(threading.Thread):
 	def __init__(self):
 		global flagWavstart
 		threading.Thread.__init__(self)
-		device = device = config['AUDIO']['inputdevice']
-		self.inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL, channels=1, rate=8000, format=alsaaudio.PCM_FORMAT_FLOAT_LE, periodsize=256, device=device)
+		self.inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL, channels=1, rate=8000, format=alsaaudio.PCM_FORMAT_FLOAT_LE, periodsize=256, device=config['AUDIO']['inputdevice'])
 		print('recording...')
 
 	def run(self):
@@ -48,6 +47,8 @@ class loadWavdata(threading.Thread):
 					c.Wavframes.append(ret)
 			else:
 				print("overrun")
+				time.sleep(0.01)
+				
 
 class AudioRXHandler(tornado.websocket.WebSocketHandler):
 

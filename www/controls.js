@@ -14,7 +14,7 @@ const IS_MOBILE = (function (a) {
 //Extra Generals///////////////////////////////////////////////////////////////////////////
 
 function bodyload(){
-	// disableSFFC();
+	disableSFFC();
 	checkCookie();
 	if(IS_MOBILE)initformobile();
 }
@@ -54,9 +54,6 @@ function disableSFFC() {
 		x = document.getElementById('canBFFFT_scale_start');
 		x.addEventListener("touchstart", disableScrolling);
 		x.addEventListener("touchend", enableScrolling);
-		
-		
-		
 	}
 
     function absorbEvent_(event) {
@@ -509,32 +506,38 @@ function initRXSmeter(){
 var SP = {0:0,1:25,2:37,3:50,4:62,5:73,6:84,7:98,8:110,9:123,10:144,20:164,30:180,40:202,50:221,60:240};
 var RIG_LEVEL_STRENGTH = {0:-54,1:-48,2:-42,3:-36,4:-30,5:-24,6:-18,7:-12,8:-6,9:0,10:10,20:20,30:30,40:40,50:50,60:60};
 function drawRXSmeter() {
-	db=RIG_LEVEL_STRENGTH[SignalLevel];
-	ctxRXsmeter.beginPath();
-	ctxRXsmeter.lineWidth = 2;
-	ctxRXsmeter.moveTo(SP[SignalLevel], 0);
-	ctxRXsmeter.lineTo(SP[SignalLevel], 50);
-	ctxRXsmeter.clearRect(0, 0, 250, 50);
-	ctxRXsmeter.strokeStyle = '#fffb16';	
-	ctxRXsmeter.stroke();
-	
-	sq=document.getElementById("SQUELCH").value*2.5;
-	ctxRXsmeter.beginPath();
-	ctxRXsmeter.lineWidth = 2;
-	ctxRXsmeter.strokeStyle = '#deded5';
-	ctxRXsmeter.moveTo(sq, 0);
-	ctxRXsmeter.lineTo(sq, 50);
-	ctxRXsmeter.stroke();
-	
-	var res = "S9";
-	if(SignalLevel > 9){
-		res = "S9+" + SignalLevel; 
+	if(typeof(RIG_LEVEL_STRENGTH[SignalLevel])!="undefined"){  
+		ctxRXsmeter.beginPath();
+		ctxRXsmeter.lineWidth = 2;
+		ctxRXsmeter.moveTo(SP[SignalLevel], 0);
+		ctxRXsmeter.lineTo(SP[SignalLevel], 50);
+		ctxRXsmeter.clearRect(0, 0, 250, 50);
+		ctxRXsmeter.strokeStyle = '#fffb16';	
+		ctxRXsmeter.stroke();
+		
+		sq=document.getElementById("SQUELCH").value*2.5;
+		ctxRXsmeter.beginPath();
+		ctxRXsmeter.lineWidth = 2;
+		ctxRXsmeter.strokeStyle = '#deded5';
+		ctxRXsmeter.moveTo(sq, 0);
+		ctxRXsmeter.lineTo(sq, 50);
+		ctxRXsmeter.stroke();
+		
+		var res = "S9";
+		if(SignalLevel > 9){
+			res = "S9+" + SignalLevel; 
+		}
+		else{res = "S" + SignalLevel;}
+		document.getElementById("div-smeterdigitRX").innerHTML=res+" ("+RIG_LEVEL_STRENGTH[SignalLevel]+"dB)";
+		
+		if(SP[SignalLevel]>=sq && !muteRX){AudioRX_SetGAIN();}
+		else{AudioRX_SetGAIN(0);}
 	}
-	else{res = "S" + SignalLevel;}
-	document.getElementById("div-smeterdigitRX").innerHTML=res+" ("+db+"dB)";
-	
-	if(SP[SignalLevel]>=sq && !muteRX){AudioRX_SetGAIN();}
-	else{AudioRX_SetGAIN(0);}
+	else{
+		document.getElementById("div-smeterdigitRX").innerHTML="";
+		ctxRXsmeter.clearRect(0, 0, 250, 50);	
+		ctxRXsmeter.stroke();
+		}
 }
 
 function TXtogle(state="None")

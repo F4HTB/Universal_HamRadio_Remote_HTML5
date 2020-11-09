@@ -324,7 +324,6 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 
 def timeoutTRXshutdown():
 	global LastPing
-	print("Shutdown TRX")
 	if(LastPing+300) < time.time():
 		print("Shutdown TRX")
 		CTRX.setPower(0)

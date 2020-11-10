@@ -113,8 +113,18 @@ function powertogle()
 		poweron = false;
 		button_unlight_all("div-filtershortcut");
 		button_unlight_all("div-mode_menu");
+		document.getElementById("div-panfft").style.display = "none";
+		if (typeof panfft !== 'undefined') {panfft.close();}
 	}
 }
+
+window.addEventListener('beforeunload', function (e) {
+	if(poweron)e.preventDefault();
+    if (typeof panfft !== 'undefined') {
+		panfft.close();
+		e.returnValue = '';
+	}
+});
 
 function check_connected() {
 	setTimeout(function () {
@@ -378,12 +388,12 @@ function ControlTRX_start(){
 
 var SignalLevel=0;
 function wsControlTRXcrtol( msg ){
-	console.log(String(msg.data));
 	words = String(msg.data).split(':');
 	if(words[0] == "PONG"){showlatency();}
 	else if(words[0] == "getFreq"){showTRXfreq(words[1]);}
 	else if(words[0] == "getMode"){showTRXmode(words[1]);}
 	else if(words[0] == "getSignalLevel"){SignalLevel=words[1];drawRXSmeter();}
+	else if(words[0] == "panfft"){document.getElementById("div-panfft").style.display = "block";}
 }
 
 function ControlTRX_stop()

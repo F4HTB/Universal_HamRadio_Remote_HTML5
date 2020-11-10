@@ -16,12 +16,163 @@ import datetime
 import configparser
 import sys
 import Hamlib
+from rtlsdr import RtlSdr
+import numpy as np
+import math
 
 ############ Global variables ##################################
 CTRX=None
 config = configparser.ConfigParser()
 config.read('UHRR.conf')
 e="No"
+
+############ Generate and send FFT from RTLSDR ##############
+
+is_rtlsdr_present = True
+
+try:
+	sdr = RtlSdr()
+	sdr.sample_rate = int(config['PANADAPTER']['sample_rate']) # Hz
+	sdr.center_freq = int(config['PANADAPTER']['center_freq']) # Hz
+	sdr.freq_correction = int(config['PANADAPTER']['freq_correction']) # PPM
+	sdr.gain = int(config['PANADAPTER']['gain']) #or 'auto'
+	FFTSIZE=2048
+	nbBuffer=24
+	nbsamples=nbBuffer/2*FFTSIZE
+	ptime=nbsamples/int(config['PANADAPTER']['sample_rate'])
+except:
+	is_rtlsdr_present = False
+	
+AudioPanaHandlerClients = []
+
+class loadFFTdata(threading.Thread):
+
+	def __init__(self):
+		threading.Thread.__init__(self)
+		self.get_log_power_spectrum_w = np.empty(FFTSIZE)
+		for i in range(FFTSIZE):
+			self.get_log_power_spectrum_w[i] = 0.5 * (1. - math.cos((2 * math.pi * i) / (FFTSIZE - 1)))
+
+	def run(self):
+		while True:
+			time.sleep(0.2)
+			self.getFFT_data()
+
+			
+	def get_log_power_spectrum(self,data):
+
+			pulse = 10
+			rejected_count = 0
+			power_spectrum = np.zeros(FFTSIZE)
+			db_adjust = 20. * math.log10(FFTSIZE * 2 ** 15)
+
+			# Time-domain analysis: Often we have long normal signals interrupted
+			# by huge wide-band pulses that degrade our power spectrum average.
+			# We find the "normal" signal level, by computing the median of the
+			# absolute value.  We only do this for the first buffer of a chunk,
+			# using the median for the remaining buffers in the chunk.
+			# A "noise pulse" is a signal level greater than some threshold
+			# times the median.  When such a pulse is found, we skip the current
+			# buffer.  It would be better to blank out just the pulse, but that
+			# would be more costly in CPU time.
+
+			# Find the median abs value of first buffer to use for this chunk.
+			td_median = np.median(np.abs(data[:FFTSIZE]))
+			# Calculate our current threshold relative to measured median.
+			td_threshold = pulse * td_median
+			nbuf_taken = 0  # Actual number of buffers accumulated
+			for ic in range(nbBuffer-1):
+				start=ic * int(FFTSIZE/2)
+				end=start+FFTSIZE
+				td_segment = data[start:end]
+
+				# remove the 0hz spike
+				td_segment = np.subtract(td_segment, np.average(td_segment))
+
+				td_max = np.amax(np.abs(td_segment))  # Do we have a noise pulse?
+				if td_max < td_threshold:  # No, get pwr spectrum etc.
+					# EXPERIMENTAL TAPERfd
+					td_segment *= self.get_log_power_spectrum_w
+
+					fd_spectrum = np.fft.fft(td_segment)
+					# Frequency-domain:
+					# Rotate array to place 0 freq. in center.  (It was at left.)
+					fd_spectrum_rot = np.fft.fftshift(fd_spectrum)
+					# Compute the real-valued squared magnitude (ie power) and 
+					# accumulate into pwr_acc.
+					# fastest way to sum |z|**2 ??
+					nbuf_taken += 1
+					power_spectrum = power_spectrum + \
+						np.real(fd_spectrum_rot * fd_spectrum_rot.conj())
+				else:  # Yes, abort buffer.
+					rejected_count += 1
+					# if DEBUG: print "REJECT! %d" % self.rejected_count
+			if nbuf_taken > 0:
+				power_spectrum = power_spectrum / nbuf_taken  # normalize the sum.
+			else:
+				power_spectrum = np.ones(FFTSIZE)  # if no good buffers!
+			# Convert to dB. Note log(0) = "-inf" in Numpy. It can happen if ADC 
+			# isn't working right. Numpy issues a warning.
+			log_power_spectrum = 10. * np.log10(power_spectrum)
+			return log_power_spectrum - db_adjust  # max poss. signal = 0 dB
+
+	def getFFT_data(self):
+		samples = sdr.read_samples(nbsamples)
+		samples = np.imag(samples) + 1j * np.real(samples)
+
+		max_pow = 0
+		min_pow = 0
+
+		power = self.get_log_power_spectrum(samples)
+		power += 60
+
+		# search whole data set for maximum and minimum value
+		for dat in power:
+			if dat > max_pow:
+				max_pow = dat
+			elif dat < min_pow:
+				min_pow = dat
+
+		asciilist=""
+		for dat in power:
+			try:
+				asciilist+=(chr(self.FFTmymap(dat, min_pow, max_pow, 0, 125)))
+			except (RuntimeError, TypeError, NameError):
+				asciilist+=chr(0)
+				pass
+		for c in AudioPanaHandlerClients:
+			c.fftframes.append(asciilist)
+		
+	def FFTmymap(self, x, in_min, in_max, out_min, out_max):
+		ret=int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+		return ret
+
+class panFFTHandler(tornado.websocket.WebSocketHandler):
+
+	@tornado.gen.coroutine
+	def sendFFT(self):
+		global ptime
+		try:
+			while len(self.fftframes)>0:
+				for i in range(8):
+					yield self.write_message(self.fftframes[0][i*256:(i+1)*256])
+				yield self.write_message("NewLine")
+				del self.fftframes[0] 
+		except:
+			return None
+		tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=ptime), self.sendFFT)
+
+	def open(self):
+		global is_rtlsdr_present
+		print('new connection on FFT socket, is_rtlsdr_present = '+str(is_rtlsdr_present))
+		if self not in AudioPanaHandlerClients:
+			AudioPanaHandlerClients.append(self)
+		self.fftframes = []
+		if is_rtlsdr_present:
+			self.sendFFT()
+
+	def on_close(self):
+		print('connection closed for FFT socket')
 
 ############ websocket for send RX audio from TRX ##############
 flagWavstart = False
@@ -289,6 +440,8 @@ class ControlTRX(tornado.websocket.WebSocketHandler):
 			self.sendPTINFOS()
 		CTRX.setPower(1)
 		print('new connection on ControlTRX socket.')
+		if(is_rtlsdr_present):
+			self.write_message("panfft")
 		
 	@tornado.gen.coroutine
 	def on_message(self, data) :
@@ -416,7 +569,28 @@ class ConfigHandler(tornado.web.RequestHandler):
 		self.write("""<option value=\"True\">\"True\"</option>""")
 		self.write("""<option value=\"False\">\"False\"</option>""")
 		self.write("""</select><br/><br/>""")
+
+		self.write("""[PANADAPTER]<br/><br/>""")
+		self.write("""PANADAPTER FI frequency (hz):<input type="text" name="PANADAPTER.center_freq" value="""+config['PANADAPTER']['center_freq']+"""><br/><br/>""")
 		
+		self.write("""HAMLIB radio rate (samples/s):<select name="PANADAPTER.sample_rate">""")
+		if(config['PANADAPTER']['sample_rate']!="null"):
+			self.write("""<option value="""+config['PANADAPTER']['sample_rate']+""" selected>"""+config['PANADAPTER']['sample_rate']+"""</option>""")
+		self.write("""<option value=3200000>3200000</option>""")
+		self.write("""<option value=2880000>2880000</option>""")
+		self.write("""<option value=2400000>2400000</option>""")
+		self.write("""<option value=1800000>1800000</option>""")
+		self.write("""<option value=1440000>1440000</option>""")
+		self.write("""<option value=1200000>1200000</option>""")
+		self.write("""<option value=1020000>1020000</option>""")
+		self.write("""<option value=960000>960000</option>""")
+		self.write("""<option value=250000>250000</option>""")
+		self.write("""</select><br/><br/>""")
+		
+		self.write("""PANADAPTER frequency correction (ppm):<input type="text" name="PANADAPTER.freq_correction" value="""+config['PANADAPTER']['freq_correction']+"""><br/><br/>""")
+
+		self.write("""PANADAPTER initial gain:<input type="text" name="PANADAPTER.gain" value="""+config['PANADAPTER']['gain']+"""><br/><br/>""")
+				
 		self.write("""<input type="submit" value="Save & Restart server"><br/><br/></form>Possible problem:"""+e+"""</html>""")
 		
 	def post(self):
@@ -437,6 +611,10 @@ class ConfigHandler(tornado.web.RequestHandler):
 if __name__ == "__main__":	
 	
 	try:
+		if is_rtlsdr_present:
+			threadFFT = loadFFTdata()
+			threadFFT.start()
+			
 		threadloadWavdata = loadWavdata()
 		threadloadWavdata.start()
 		
@@ -454,6 +632,7 @@ if __name__ == "__main__":
 		(r'/audioRX', AudioRXHandler),
 		(r'/audioTX', AudioTXHandler),
 		(r'/CTRX', ControlTRX),
+		(r'/panFFT', panFFTHandler),
 		(r'/CONFIG', ConfigHandler),
 		(r'/', MainHandler),
 		(r'/(.*)', tornado.web.StaticFileHandler, { 'path' : './www' })

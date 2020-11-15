@@ -13,9 +13,9 @@ Please don't raise an issue for anything outside of the intended design.<br>
 <br><br><br>
 <b>More info on the wiki page:</b>https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
 <br><br><br>
-News:
--Add panadapter based on the output FI of the radio and a RTLSDR key
--Add authantification mecanisme
+News:<br>
+-Add panadapter based on the output FI of the radio and a RTLSDR key<br>
+-Add authantification mecanisme<br>
 <br><br><br>
 
 

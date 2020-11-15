@@ -59,16 +59,47 @@ copy and past: runuser -l pi -c '(cd /home/pi/Universal_HamRadio_Remote_HTML5/ &
 
 ```
 [SERVER]
-SERVER port: the server port
+
+SERVER TCP/IP port:Defautl:8888.The server port
+
+SERVER Authentification type: Defautl:leave blank. Else you can use "FILE" or/and "PAM".
+
+SERVER database users file: Defautl:UHRR_users.db Only if you use Authentification type "FILE".
+
+You can change database users file in UHRR.conf.
+To add a user in FILE type, add it in UHRR_users.db (default file name).
+Add one account per line as login password.
+If you plan to use PAM you can add account in command line: adduser --no-create-home --system thecallsign.
+
+If you whant to change certfile and keyfile, replace "UHRH.crt" and "UHRH.key" in the boot folder, and when the pi boot, it will use those files to start http ssl.
 
 [AUDIO]
-AUDIO outputdevice: output from audio soundcard to the mic input of TRX
-AUDIO inputdevice: input from audio soundcard from the speaker output of TRX
+
+AUDIO outputdevice: Output from audio soundcard to the mic input of TRX.
+
+AUDIO inputdevice: Input from audio soundcard from the speaker output of TRX.
 
 [HAMLIB]
-HAMLIB com port: com port of the CAT interface
-HAMLIB radio model: hamlib trx model
-HAMLIB auto tx poweroff: set to auto power off the trx when it's not in use
+
+HAMLIB radio model: Hamlib trx model.
+
+HAMLIB serial port: Serial port of the CAT interface.
+
+HAMLIB radio rate: Serial port baud rate.
+
+HAMLIB auto tx poweroff: Set to auto power off the trx when it's not in use
+
+[PANADAPTER]
+
+PANADAPTER FI frequency (hz):
+
+HAMLIB radio rate (samples/s):
+
+PANADAPTER frequency correction (ppm):
+
+PANADAPTER initial gain:
+
+Possible problem:No
 ```
 ## Possible problem
 No //is for get some problemes from the code

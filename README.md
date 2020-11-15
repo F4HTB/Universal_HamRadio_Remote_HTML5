@@ -10,7 +10,9 @@ It is designed for Raspberry Pi OS (32-bit) Lite (actually "Minimal image based 
 Use only if it is legal in your country.<br>
 It is intended for remote use, it is not designed for use on the same computer as an interface even though it will likely work.<br>
 Please don't raise an issue for anything outside of the intended design.<br>
-<br>
+<br><br><br>
+<b>More info on the wiki page:</b>https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
+<br><br><br>
 ![alt text](README/UHRR_Pict.png)
 
 This utility is used to set up an amateur radio station remotely via a web browser.
@@ -19,8 +21,6 @@ You need:
 - a radio station compatible with Hamlib.
 - a cat interface.
 - a circuit making it possible to adapt the audio levels between the microphone input, the speaker output and the sound card.
-
-<b>More info on the wiki page:</b>https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
 
 Assuming your raspberry pi hostname is set to UHRR, you can access it at https://UHRR.local:8888/
 Note the HTTP <b> S </b>.

@@ -89,6 +89,11 @@ overflow: hidden;
 	text-align:center;
 }
 
+#callsign > a > img{
+	height:25px; 
+	width:25px;
+}
+
 #personalfrequency
 {
 	position:absolute;

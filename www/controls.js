@@ -599,8 +599,10 @@ function getCookie(cname) {
 function checkCookie() {
   var callsign=getCookie("callsign");
   if (callsign != "") {
-    alert("Welcome again " + callsign);
-	document.getElementById("callsign").innerHTML=callsign;
+    alert("Welcome " + callsign);
+	labelcalls = document.getElementById("callsign");
+	labelcalls.innerHTML=callsign;
+	if(getCookie("autha"))labelcalls.innerHTML+='&ensp;<a href="/logout" id="logout"><img src="img/logout.png"></a>';
   } else {
      callsign = prompt("Please enter your Call Sign:","");
      if (callsign != "" && callsign != null) {

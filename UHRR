@@ -26,6 +26,14 @@ config = configparser.ConfigParser()
 config.read('UHRR.conf')
 e="No"
 
+############ Global functions ##################################
+def writte_log(logmsg):
+	logfile = open(config['SERVER']['log_file'],"w") 
+	msg = str(datetime.datetime.now())+":"+str(logmsg)
+	logfile.write(msg) 
+	print(msg)
+	logfile.close()
+	
 ############ Generate and send FFT from RTLSDR ##############
 
 is_rtlsdr_present = True
@@ -491,16 +499,19 @@ class threadtimeoutTRXshutdown(threading.Thread):
 			time.sleep(60)
 			timeoutTRXshutdown()
 
-############ Main ##############
-class MainHandler(tornado.web.RequestHandler):
+############ BaseHandler tornado ##############
+class BaseHandler(tornado.web.RequestHandler):
+	def get_current_user(self):
+		return self.get_secure_cookie("user")
 
+############ Config ##############
+class ConfigHandler(BaseHandler):
 	def get(self):
-		self.application.settings.get("compiled_template_cache", False)
-		self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-		self.render("www/index.html")
-		
-class ConfigHandler(tornado.web.RequestHandler):
-	def get(self):
+	
+		if bool(config['SERVER']['auth']) and not self.current_user:
+			self.redirect("/login")
+			return
+	
 		self.application.settings.get("compiled_template_cache", False)
 		self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
 		try:
@@ -513,7 +524,11 @@ class ConfigHandler(tornado.web.RequestHandler):
 		rig_models=[s[10:] for s in dir(Hamlib) if "RIG_MODEL_" in s]
 		self.write("""<html><form method="POST" action="/CONFIG">""")
 		self.write("""[SERVER]<br/><br/>""")
-		self.write("""SERVER TCP/IP port:<input type="text" name="SERVER.port" value="""+config['SERVER']['port']+"""><br/><br/>""")
+		self.write("""SERVER TCP/IP port:<input type="text" name="SERVER.port" value="""+config['SERVER']['port']+""">Defautl:<b>8888</b>.The server port<br/><br/>""")
+		self.write("""SERVER Authentification type:<input type="text" name="SERVER.auth" value="""+config['SERVER']['auth']+"""> Defautl:<b>leave blank</b>. Else you can use "FILE" or/and "PAM".<br/><br/>""")
+		self.write("""SERVER database users file:<input type="text" name="SERVER.db_users_file" value="""+config['SERVER']['db_users_file']+"""> Defautl:<b>UHRR_users.db</b> Only if you use Authentification type "FILE".<br/><br/>""")
+		self.write("""You can change database users file in UHRR.conf.<br/> To add a user in FILE type, add it in UHRR_users.db (default file name).<br/>Add one account per line as login password.<br/>""")
+		self.write("""If you plan to use PAM you can add account in command line: adduser --no-create-home --system thecallsign.<br/><br/>""")
 		self.write("""If you whant to change certfile and keyfile, replace "UHRH.crt" and "UHRH.key" in the boot folder, and when the pi boot, it will use those files to start http ssl.<br/><br/>""")
 
 		self.write("""[AUDIO]<br/><br/>""")
@@ -522,29 +537,30 @@ class ConfigHandler(tornado.web.RequestHandler):
 			self.write("""<option value="""+config['AUDIO']['outputdevice']+""" selected>"""+config['AUDIO']['outputdevice']+"""</option>""")
 		for c in audiodevicesoutput:
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
-		self.write("""</select><br/><br/>""")
+		self.write("""</select> Output from audio soundcard to the mic input of TRX.<br/><br/>""")
 		
 		self.write("""AUDIO inputdevice:<select name="AUDIO.inputdevice">""")
 		if(config['AUDIO']['inputdevice']!="null"):
 			self.write("""<option value="""+config['AUDIO']['inputdevice']+""" selected>"""+config['AUDIO']['inputdevice']+"""</option>""")
 		for c in audiodevicesinput:
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
-		self.write("""</select><br/><br/>""")
+		self.write("""</select> Input from audio soundcard from the speaker output of TRX.<br/><br/>""")
 
 		self.write("""[HAMLIB]<br/><br/>""")
-		self.write("""HAMLIB serial port:<select name="HAMLIB.rig_pathname">""")
-		if(config['HAMLIB']['rig_pathname']!="null"):
-			self.write("""<option value="""+config['HAMLIB']['rig_pathname']+""" selected>"""+config['HAMLIB']['rig_pathname']+"""</option>""")
-		for c in comports:
-			self.write("""<option value="""+str(c.device)+""">"""+str(c.device)+"""</option>""")
-		self.write("""</select><br/><br/>""")
-		
+	
 		self.write("""HAMLIB radio model:<select name="HAMLIB.rig_model">""")
 		if(config['HAMLIB']['rig_model']!="null"):
 			self.write("""<option value="""+config['HAMLIB']['rig_model']+""" selected>"""+config['HAMLIB']['rig_model']+"""</option>""")
 		for c in rig_models:
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
-		self.write("""</select><br/><br/>""")
+		self.write("""</select> Hamlib trx model.<br/><br/>""")
+		
+		self.write("""HAMLIB serial port:<select name="HAMLIB.rig_pathname">""")
+		if(config['HAMLIB']['rig_pathname']!="null"):
+			self.write("""<option value="""+config['HAMLIB']['rig_pathname']+""" selected>"""+config['HAMLIB']['rig_pathname']+"""</option>""")
+		for c in comports:
+			self.write("""<option value="""+str(c.device)+""">"""+str(c.device)+"""</option>""")
+		self.write("""</select> Serial port of the CAT interface.<br/><br/>""")
 		
 		self.write("""HAMLIB radio rate:<select name="HAMLIB.rig_rate">""")
 		if(config['HAMLIB']['rig_rate']!="null"):
@@ -561,14 +577,14 @@ class ConfigHandler(tornado.web.RequestHandler):
 		self.write("""<option value=600>600</option>""")
 		self.write("""<option value=300>300</option>""")
 		self.write("""<option value=150>150</option>""")
-		self.write("""</select><br/><br/>""")
+		self.write("""</select> Serial port baud rate.<br/><br/>""")
 		
 		self.write("""HAMLIB auto tx poweroff:<select name="HAMLIB.trxautopower">""")
 		if(config['HAMLIB']['trxautopower']!="null"):
 			self.write("""<option value="""+config['HAMLIB']['trxautopower']+""" selected>"""+config['HAMLIB']['trxautopower']+"""</option>""")
-		self.write("""<option value=\"True\">\"True\"</option>""")
-		self.write("""<option value=\"False\">\"False\"</option>""")
-		self.write("""</select><br/><br/>""")
+		self.write("""<option value=\"True\">True</option>""")
+		self.write("""<option value=\"False\">False</option>""")
+		self.write("""</select> Set to auto power off the trx when it's not in use<br/><br/>""")
 
 		self.write("""[PANADAPTER]<br/><br/>""")
 		self.write("""PANADAPTER FI frequency (hz):<input type="text" name="PANADAPTER.center_freq" value="""+config['PANADAPTER']['center_freq']+"""><br/><br/>""")
@@ -594,6 +610,11 @@ class ConfigHandler(tornado.web.RequestHandler):
 		self.write("""<input type="submit" value="Save & Restart server"><br/><br/></form>Possible problem:"""+e+"""</html>""")
 		
 	def post(self):
+	
+		if bool(config['SERVER']['auth']) and not self.current_user:
+			self.redirect("/login")
+			return
+			
 		for x in self.request.arguments:
 			(s,o)=x.split(".")
 			v=self.get_argument(x)
@@ -607,6 +628,64 @@ class ConfigHandler(tornado.web.RequestHandler):
 		time.sleep(2)
 		os.system("sleep 2;./UHRR &")
 		os._exit(1)
+		
+############ Login ##############
+class AuthLoginHandler(BaseHandler):
+
+	def get(self):
+		if not bool(config['SERVER']['auth']):
+			self.redirect("/")
+			return
+		self.write('<html><body><form action="/login" method="post">'
+					'CallSign: <input type="text" name="name"></br>'
+					'Password: <input type="password" name="passwd"></br>'
+					'<input type="submit" value="Sign in">'
+					'</form></body></html>')
+
+	def post(self):
+		if self.get_argument("name") != "" and self.get_argument("passwd") != "":
+			if self.bind(self.get_argument("name"),self.get_argument("passwd")):
+				self.set_secure_cookie("user", self.get_argument("name"))
+				self.set_cookie("callsign", self.get_argument("name"))
+				self.set_cookie("autha", "1")
+			else:
+				writte_log("Auth error for CallSign:"+str(self.get_argument("name")))
+		self.redirect("/")
+		
+	def bind(self,user="",password=""):
+		retval = False
+		if (user!="" and password!=""):
+			if config['SERVER']['auth'].find("FILE") != -1: #test with users db file
+				f = open(config['SERVER']['db_users_file'], "r") 
+				for x in f:
+					if x[0]!="#":
+						db=x.split(" ")
+						if db[0] == user and db[1]== password:
+							retval = True
+							break		
+			if not retval and config['SERVER']['auth'].find("PAM") != -1:#test with pam module
+				if config['SERVER']['pam_account'].find(user) != -1:
+					import pam
+					retval = pam.authenticate(user, password) 
+		return retval
+		
+class AuthLogoutHandler(BaseHandler):
+	def get(self):
+		self.clear_cookie("user")
+		self.clear_cookie("autha")
+		self.redirect(self.get_argument("next", "/"))
+		
+############ Main ##############
+class MainHandler(BaseHandler):
+
+	def get(self):
+		print("Tornado current user:"+str(self.current_user))
+		if bool(config['SERVER']['auth']) and not self.current_user:
+			self.redirect("/login")
+			return
+		self.application.settings.get("compiled_template_cache", False)
+		self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+		self.render("www/index.html")
 
 if __name__ == "__main__":	
 	
@@ -629,6 +708,8 @@ if __name__ == "__main__":
 		
 		
 		app = tornado.web.Application([
+		(r"/login", AuthLoginHandler),
+		(r"/logout", AuthLogoutHandler),
 		(r'/audioRX', AudioRXHandler),
 		(r'/audioTX', AudioTXHandler),
 		(r'/CTRX', ControlTRX),
@@ -636,7 +717,7 @@ if __name__ == "__main__":
 		(r'/CONFIG', ConfigHandler),
 		(r'/', MainHandler),
 		(r'/(.*)', tornado.web.StaticFileHandler, { 'path' : './www' })
-		],debug=bool(config['SERVER']['debug']), websocket_ping_interval=10)
+		],debug=bool(config['SERVER']['debug']), websocket_ping_interval=10, cookie_secret=config['SERVER']['cookie_secret'])
 	except:
 		e = str(sys.exc_info())
 		print(e)
@@ -653,3 +734,4 @@ if __name__ == "__main__":
 	http_server.listen(int(config['SERVER']['port']))
 	print('HTTP server started.')
 	tornado.ioloop.IOLoop.instance().start()
+

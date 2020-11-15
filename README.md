@@ -13,6 +13,12 @@ Please don't raise an issue for anything outside of the intended design.<br>
 <br><br><br>
 <b>More info on the wiki page:</b>https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
 <br><br><br>
+News:
+-Add panadapter based on the output FI of the radio and a RTLSDR key
+-Add authantification mecanisme
+<br><br><br>
+
+
 ![alt text](README/UHRR_Pict.png)
 
 This utility is used to set up an amateur radio station remotely via a web browser.

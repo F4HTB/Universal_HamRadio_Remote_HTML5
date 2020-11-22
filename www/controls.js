@@ -390,7 +390,7 @@ var SignalLevel=0;
 function wsControlTRXcrtol( msg ){
 	words = String(msg.data).split(':');
 	if(words[0] == "PONG"){showlatency();}
-	else if(words[0] == "getFreq"){showTRXfreq(words[1]);}
+	else if(words[0] == "getFreq"){showTRXfreq(words[1]);TRXfrequency=parseInt(words[1]);if (typeof panfft !== 'undefined') {panfft.setcenterfrequency(words[1]);}}
 	else if(words[0] == "getMode"){showTRXmode(words[1]);}
 	else if(words[0] == "getSignalLevel"){SignalLevel=words[1];drawRXSmeter();}
 	else if(words[0] == "panfft"){document.getElementById("div-panfft").style.display = "block";}
@@ -400,6 +400,10 @@ function ControlTRX_stop()
 {
 	wsControlTRX.close();
 } 
+
+function ControlTRX_getFreq(){
+	if (wsControlTRX.readyState === WebSocket.OPEN) {wsControlTRX.send("getFreq");}
+}
 
 function wsControlTRXopen(){
 	document.getElementById("indwsControlTRX").innerHTML='<img src="img/critsgreen.png">wsCtrl';
@@ -483,8 +487,9 @@ function showTRXfreq(freq){
 	document.getElementById("uhz").innerHTML=freq.substring(8, 9);
 }
 
-function sendTRXfreq(){
-	if (wsControlTRX.readyState === WebSocket.OPEN) {wsControlTRX.send("setFreq:"+get_digit_freq());}
+function sendTRXfreq(freq=0){
+	if(!freq){freq=get_digit_freq();}
+		if (wsControlTRX.readyState === WebSocket.OPEN) {wsControlTRX.send("setFreq:"+freq);}
 }
 
 function sendTRXptt(stat){

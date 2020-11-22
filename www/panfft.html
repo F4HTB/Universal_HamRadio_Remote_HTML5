@@ -7,15 +7,19 @@
 	<body onload="bodyload();">
 	<div id="div-princ">
 		<div id="div-sp">
-			<canvas id="cansp" width=2048 height=256></canvas>
+			<canvas id="cansp" class="cansp" width=4096 height=256 "></canvas>
 		</div>
 		<div id="div-wf">
-			<canvas id="canwf" width=2048 height=256></canvas>
+			<canvas id="canwf" class="canwf" width=4096 height=256 "></canvas>
 		</div>
 		<div id="div-ctrl">
-			aaa
-			<div id="div-scoketscontrols"><img src="img/critsred.png">wsFFT</div>
+			Center Frequency:<div class="ctrl_visual" id="div-CenterFrequency"></div>|
+			SampleRate:<div class="ctrl_visual" id="div-SampleRate"></div>|
+			FFT resolution:<div class="ctrl_visual" id="div-FFtResolution"></div>|
+			Mouse Frequency:<div class="ctrl_visual" id="div-mouseFrequency"></div>|
+			Windows Zoom:<div class="ctrl_visual" id="div-WindowsZoom">100%</div>|
 		</div>
+		<div id="div-scoketscontrols"><img src="img/critsred.png">wsFFT</div>
 	</div>
 	<script src="panfft.js"></script>
 	</body>

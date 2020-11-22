@@ -44,7 +44,7 @@ try:
 	sdr.center_freq = int(config['PANADAPTER']['center_freq']) # Hz
 	sdr.freq_correction = int(config['PANADAPTER']['freq_correction']) # PPM
 	sdr.gain = int(config['PANADAPTER']['gain']) #or 'auto'
-	FFTSIZE=2048
+	FFTSIZE=4096
 	nbBuffer=24
 	nbsamples=nbBuffer/2*FFTSIZE
 	ptime=nbsamples/int(config['PANADAPTER']['sample_rate'])
@@ -63,7 +63,7 @@ class loadFFTdata(threading.Thread):
 
 	def run(self):
 		while True:
-			time.sleep(0.2)
+			time.sleep(ptime)
 			self.getFFT_data()
 
 			
@@ -155,14 +155,16 @@ class loadFFTdata(threading.Thread):
 		ret=int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
 		return ret
 
+fftpaquetlen=int(FFTSIZE*8/2048)
+
 class panFFTHandler(tornado.websocket.WebSocketHandler):
 
 	@tornado.gen.coroutine
 	def sendFFT(self):
-		global ptime
+		global ptime, fftpaquetlen
 		try:
 			while len(self.fftframes)>0:
-				for i in range(8):
+				for i in range(fftpaquetlen):
 					yield self.write_message(self.fftframes[0][i*256:(i+1)*256])
 				yield self.write_message("NewLine")
 				del self.fftframes[0] 
@@ -176,8 +178,15 @@ class panFFTHandler(tornado.websocket.WebSocketHandler):
 		if self not in AudioPanaHandlerClients:
 			AudioPanaHandlerClients.append(self)
 		self.fftframes = []
-		if is_rtlsdr_present:
+			
+	def on_message(self, data) :
+		print(data)
+		if str(data)=="ready":
 			self.sendFFT()
+		elif str(data)=="init":
+			self.write_message("fftsr:"+str(config['PANADAPTER']['sample_rate']));
+			self.write_message("fftsz:"+str(FFTSIZE));
+			self.write_message("fftst");
 
 	def on_close(self):
 		print('connection closed for FFT socket')
@@ -600,7 +609,6 @@ class ConfigHandler(BaseHandler):
 		self.write("""<option value=1200000>1200000</option>""")
 		self.write("""<option value=1020000>1020000</option>""")
 		self.write("""<option value=960000>960000</option>""")
-		self.write("""<option value=250000>250000</option>""")
 		self.write("""</select><br/><br/>""")
 		
 		self.write("""PANADAPTER frequency correction (ppm):<input type="text" name="PANADAPTER.freq_correction" value="""+config['PANADAPTER']['freq_correction']+"""><br/><br/>""")

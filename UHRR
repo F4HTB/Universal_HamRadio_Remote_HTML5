@@ -53,17 +53,6 @@ except:
 	
 AudioPanaHandlerClients = []
 
-def to_byte_array(num):
-    bytea = []
-    n = num
-    while n:
-        bytea.append(n % 256)
-        n //= 256
-    n_bytes = len(bytea)
-    if 2 ** (n_bytes * 8 - 1) <= num < 2 ** (n_bytes * 8):
-        bytea.append(0)
-    return bytearray(bytea)
-
 class loadFFTdata(threading.Thread):
 
 	def __init__(self):

@@ -178,7 +178,7 @@ function AudioRX_start(){
 				for (var i = 0, buff_size = synth_buff.length; i < buff_size; i++) {
 					synth_buff[i] = AudioRX_audiobuffer[0][i];
 				}
-				if(le > 0){AudioRX_audiobuffer.shift();}
+				if(le){AudioRX_audiobuffer.shift();}
 			}
 		};
 	}());

@@ -159,14 +159,10 @@ function AudioRX_start(){
 	wsAudioRX.onerror = wsAudioRXerror;
 
 	function appendwsAudioRX( msg ){
-		var buffer = new Float32Array(msg.data);
-		AudioRX_audiobuffer.push(buffer);
-		if(AudioRX_audiobuffer.length>lenglitchbuf){audiobufferready= true;}
-		//console.log(AudioRX_audiobuffer.length);
-		
+		AudioRX_audiobuffer.push(new Float32Array(msg.data));
 	}
 
-	var BUFF_SIZE = 256; // spec allows, yet do not go below 1024 
+	const BUFF_SIZE = 256; // spec allows, yet do not go below 1024 
 	AudioRX_context = new AudioContext({latencyHint: "interactive",sampleRate: AudioRX_sampleRate});
 	AudioRX_gain_node = AudioRX_context.createGain();
 	AudioRX_biquadFilter_node = AudioRX_context.createBiquadFilter();
@@ -177,11 +173,12 @@ function AudioRX_start(){
 	AudioRX_source_node.onaudioprocess = (function() {
 		return function(event) {
 			var synth_buff = event.outputBuffer.getChannelData(0); // mono for now
-			if(audiobufferready){
+			let le = Boolean(AudioRX_audiobuffer.length);
+			if(le){
 				for (var i = 0, buff_size = synth_buff.length; i < buff_size; i++) {
 					synth_buff[i] = AudioRX_audiobuffer[0][i];
 				}
-				if(AudioRX_audiobuffer.length > 1){AudioRX_audiobuffer.shift();}
+				if(le > 0){AudioRX_audiobuffer.shift();}
 			}
 		};
 	}());

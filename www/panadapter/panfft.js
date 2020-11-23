@@ -35,7 +35,7 @@ function set_FFT_Viso_min(v){FFT_Viso_min=v;}
 
 function startFFT(){ 
 	document.getElementById("div-scoketscontrols").innerHTML='<img src="img/critsgrey.png">wsFFT';
-	wshFFT = new WebSocket( 'wss://' + window.location.href.split( '/' )[2] + '/panFFT' );
+	wshFFT = new WebSocket( 'wss://' + window.location.href.split( '/' )[2] + '/WSpanFFT' );
 	wshFFT.onopen = appendwshFFTOpen;
 	wshFFT.onmessage = init_showFFT;
 	wshFFT.onerror = appendwshFFTError;

@@ -33,9 +33,13 @@ def writte_log(logmsg):
 	logfile.write(msg) 
 	print(msg)
 	logfile.close()
-	
-############ Generate and send FFT from RTLSDR ##############
 
+############ BaseHandler tornado ##############
+class BaseHandler(tornado.web.RequestHandler):
+	def get_current_user(self):
+		return self.get_secure_cookie("user")
+
+############ Generate and send FFT from RTLSDR ##############
 is_rtlsdr_present = True
 
 try:
@@ -161,7 +165,7 @@ class loadFFTdata(threading.Thread):
 
 fftpaquetlen=int(FFTSIZE*8/2048)
 
-class panFFTHandler(tornado.websocket.WebSocketHandler):
+class WS_panFFTHandler(tornado.websocket.WebSocketHandler):
 
 	@tornado.gen.coroutine
 	def sendFFT(self):
@@ -220,7 +224,7 @@ class loadWavdata(threading.Thread):
 				time.sleep(0.01)
 				
 
-class AudioRXHandler(tornado.websocket.WebSocketHandler):
+class WS_AudioRXHandler(tornado.websocket.WebSocketHandler):
 
 	def open(self):
 		self.set_nodelay(True)
@@ -254,7 +258,7 @@ class AudioRXHandler(tornado.websocket.WebSocketHandler):
 last_AudioTXHandler_msg_time=0
 AudioTXHandlerClients = []
 
-class AudioTXHandler(tornado.websocket.WebSocketHandler):
+class WS_AudioTXHandler(tornado.websocket.WebSocketHandler):
 
 	def stoppttontimeout(self):
 		global last_AudioTXHandler_msg_time
@@ -435,7 +439,7 @@ class ticksTRXRIG(threading.Thread):
 				CTRX.getStrgLVL()
 			time.sleep(0.1)
 
-class ControlTRX(tornado.websocket.WebSocketHandler):
+class WS_ControlTRX(tornado.websocket.WebSocketHandler):
 
 	def send_to_all_clients(self,msg):
 		print ("Send to all: "+msg)
@@ -509,11 +513,6 @@ class threadtimeoutTRXshutdown(threading.Thread):
 		while True:
 			time.sleep(60)
 			timeoutTRXshutdown()
-
-############ BaseHandler tornado ##############
-class BaseHandler(tornado.web.RequestHandler):
-	def get_current_user(self):
-		return self.get_secure_cookie("user")
 
 ############ Config ##############
 class ConfigHandler(BaseHandler):
@@ -718,12 +717,13 @@ if __name__ == "__main__":
 		
 		
 		app = tornado.web.Application([
-		(r"/login", AuthLoginHandler),
-		(r"/logout", AuthLogoutHandler),
-		(r'/audioRX', AudioRXHandler),
-		(r'/audioTX', AudioTXHandler),
-		(r'/CTRX', ControlTRX),
-		(r'/panFFT', panFFTHandler),
+		(r'/login', AuthLoginHandler),
+		(r'/logout', AuthLogoutHandler),
+		(r'/WSaudioRX', WS_AudioRXHandler),
+		(r'/WSaudioTX', WS_AudioTXHandler),
+		(r'/WSCTRX', WS_ControlTRX),
+		(r'/WSpanFFT', WS_panFFTHandler),
+		(r'/(panfft.*)', tornado.web.StaticFileHandler, { 'path' : './www/panadapter' }),
 		(r'/CONFIG', ConfigHandler),
 		(r'/', MainHandler),
 		(r'/(.*)', tornado.web.StaticFileHandler, { 'path' : './www' })

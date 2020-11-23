@@ -151,7 +151,7 @@ function AudioRX_start(){
 	document.getElementById("indwsAudioRX").innerHTML='<img src="img/critsgrey.png">wsRX';
 	AudioRX_audiobuffer = [];var lenglitchbuf = 2;
 
-	wsAudioRX = new WebSocket( 'wss://' + window.location.href.split( '/' )[2] + '/audioRX' );
+	wsAudioRX = new WebSocket( 'wss://' + window.location.href.split( '/' )[2] + '/WSaudioRX' );
 	wsAudioRX.binaryType = 'arraybuffer';
 	wsAudioRX.onmessage = appendwsAudioRX;
 	wsAudioRX.onopen = wsAudioRXopen;
@@ -379,7 +379,7 @@ var wsControlTRX = "";
 
 function ControlTRX_start(){
 	document.getElementById("indwsControlTRX").innerHTML='<img src="img/critsgrey.png">wsCtrl';
-	wsControlTRX = new WebSocket( 'wss://' + window.location.href.split( '/' )[2] + '/CTRX' );
+	wsControlTRX = new WebSocket( 'wss://' + window.location.href.split( '/' )[2] + '/WSCTRX' );
 	wsControlTRX.onopen = wsControlTRXopen;
 	wsControlTRX.onclose = wsControlTRXclose;
 	wsControlTRX.onerror = wsControlTRXerror;
@@ -1189,7 +1189,7 @@ function AudioTX_start()
 isRecording = false;
 encode = false;
 document.getElementById("indwsAudioTX").innerHTML='<img src="img/critsgrey.png">wsTX';
-wsAudioTX = new WebSocket( 'wss://' + window.location.href.split( '/' )[2] + '/audioTX' );
+wsAudioTX = new WebSocket( 'wss://' + window.location.href.split( '/' )[2] + '/WSaudioTX' );
 wsAudioTX.onopen = appendwsAudioTXOpen;
 wsAudioTX.onerror = appendwsAudioTXError;
 wsAudioTX.onclose = appendwsAudioTXclose;

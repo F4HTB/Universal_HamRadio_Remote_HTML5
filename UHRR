@@ -53,6 +53,17 @@ except:
 	
 AudioPanaHandlerClients = []
 
+def to_byte_array(num):
+    bytea = []
+    n = num
+    while n:
+        bytea.append(n % 256)
+        n //= 256
+    n_bytes = len(bytea)
+    if 2 ** (n_bytes * 8 - 1) <= num < 2 ** (n_bytes * 8):
+        bytea.append(0)
+    return bytearray(bytea)
+
 class loadFFTdata(threading.Thread):
 
 	def __init__(self):
@@ -128,11 +139,10 @@ class loadFFTdata(threading.Thread):
 		samples = sdr.read_samples(nbsamples)
 		samples = np.imag(samples) + 1j * np.real(samples)
 
-		max_pow = 0
+		max_pow = -254
 		min_pow = 0
 
 		power = self.get_log_power_spectrum(samples)
-		power += 60
 
 		# search whole data set for maximum and minimum value
 		for dat in power:
@@ -140,16 +150,21 @@ class loadFFTdata(threading.Thread):
 				max_pow = dat
 			elif dat < min_pow:
 				min_pow = dat
-
-		asciilist=""
-		for dat in power:
-			try:
-				asciilist+=(chr(self.FFTmymap(dat, min_pow, max_pow, 0, 125)))
-			except (RuntimeError, TypeError, NameError):
-				asciilist+=chr(0)
-				pass
-		for c in AudioPanaHandlerClients:
-			c.fftframes.append(asciilist)
+				
+		byteslist=bytearray()
+		try:
+			for dat in power:
+				try:
+					byteslist.append(self.FFTmymap(dat, min_pow, max_pow, 0, 255))
+				except (RuntimeError, TypeError, NameError):
+					byteslist.append(255)
+					pass
+			byteslist+=bytearray((65280+int(min_pow)).to_bytes(2, byteorder="big"))
+			byteslist+=bytearray((65280+int(max_pow)).to_bytes(2, byteorder="big")) 
+			for c in AudioPanaHandlerClients:
+				c.fftframes.append(bytes(byteslist))
+		except:
+			return None
 		
 	def FFTmymap(self, x, in_min, in_max, out_min, out_max):
 		ret=int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
@@ -164,9 +179,7 @@ class panFFTHandler(tornado.websocket.WebSocketHandler):
 		global ptime, fftpaquetlen
 		try:
 			while len(self.fftframes)>0:
-				for i in range(fftpaquetlen):
-					yield self.write_message(self.fftframes[0][i*256:(i+1)*256])
-				yield self.write_message("NewLine")
+				yield self.write_message(self.fftframes[0],binary=True)
 				del self.fftframes[0] 
 		except:
 			return None

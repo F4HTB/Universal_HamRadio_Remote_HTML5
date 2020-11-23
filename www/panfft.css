@@ -53,6 +53,7 @@ body {
 	padding:0px;
 	margin:0px;
 	left: 0%;
+	align-items: center; /* Vertical */
 }
 
 .ctrl_visual{

@@ -9,6 +9,9 @@ var FFTSIZE = 4096;
 var localcenterfrequency=0;
 var freqmouse=0;
 
+var FFT_Viso_Dynamic=50
+var FFT_Viso_min=-180
+
 
 const visual_CenterFrequency = document.getElementById("div-CenterFrequency");
 const visual_SampleRate = document.getElementById("div-SampleRate");
@@ -23,6 +26,10 @@ function bodyload(){
 	initFFT();
 	startFFT();
 }
+
+function set_FFT_Viso_Dynamic(v){FFT_Viso_Dynamic=v;}
+function set_FFT_Viso_min(v){FFT_Viso_min=v;}
+
 
 
 
@@ -66,14 +73,13 @@ var globmsg = "";
 
 function init_showFFT( msg ){ 
 	datas = msg.data.split(':');
-	console.log(datas);
 	if(datas[0] == "fftsr"){
 		samplerate=datas[1];
 	}
 	else if(datas[0] == "fftsz"){
-		FFTSIZE=datas[1];
-		canvasSP.width=FFTSIZE;
-		canvasWF.width=FFTSIZE;
+		FFTSIZE=parseInt(datas[1]);
+		canvasSP.width=parseInt(FFTSIZE);
+		canvasWF.width=parseInt(FFTSIZE);
 		var canvas_width_SP=document.getElementById("cansp").width;
 		var canvas_height_SP=document.getElementById("cansp").height;
 		var canvas_width_WF=document.getElementById("canwf").width;
@@ -84,37 +90,37 @@ function init_showFFT( msg ){
 		visual_FFtResolution.innerHTML=samplerate/FFTSIZE+"hz/px";
 		wshFFT.send("ready");
 		window.opener.ControlTRX_getFreq();
+		wshFFT.binaryType = 'arraybuffer';
 		wshFFT.onmessage = showFFT;
 	}
 }
 
 function showFFT( msg ){ 
-	if(msg.data != "NewLine"){globmsg += msg.data;}
-	else{
-		if(globmsg.length == canvas_width_WF){
-			let FFTdata = [];
-			FFTdata = globmsg.split('');
-			FFTdata.forEach((item, index) => {  FFTdata[index]= (item.charCodeAt(0))<< 1; }) // FFTdata[index]= Math.round(item.charCodeAt(0))*2; })
-			SetImageDataWF(FFTdata);
-			SetImageDataSP(FFTdata);
-		}
-		globmsg="";
-	}
+	var buffer = new Uint8Array(msg.data);
+	let FFTdata = buffer.subarray(0, FFTSIZE);
+	FFTdata_scale_min = ((buffer[FFTSIZE] << 8) + (buffer[FFTSIZE+1]))-65280;
+	FFTdata_scale_max= ((buffer[FFTSIZE+2] << 8) + (buffer[FFTSIZE+3]))-65280;
+	
+	min_Factor=FFTdata_scale_min-FFT_Viso_min;
+	max_Factor=(FFTdata_scale_max-FFTdata_scale_min)/FFT_Viso_Dynamic;
+	
+	SetImageDataWF(FFTdata,min_Factor,max_Factor);
+	SetImageDataSP(FFTdata,min_Factor,max_Factor);
 }
 
 
 const ctxSP = canvasSP.getContext("2d");// imgObjSP = ctxSP.createImageData(canvasSP.width, canvas_height);	
 const midle_SP = canvas_width_SP*2;
 
-function SetImageDataSP(datas) {
+function SetImageDataSP(datas,scale_min,scale_max) {
 	imgObjSP = new ImageData(canvasSP.width, canvas_height_SP);
 	let i = 0;
 	for(let Line = 0; Line < canvas_height_SP; Line++){
 		i = 4*(Line * canvas_width_SP);
 		y = canvas_height_SP - Line;
 		for (let px = 0; px < canvas_width_SP; px++) {
-			
-			if(y <= datas[px]){
+			let dat = (datas[px]*scale_max + scale_min);
+			if(y <= dat){
 			//imgObjSP.data[i] = 0;   // red
 			imgObjSP.data[++i] = 215; // green
 			imgObjSP.data[++i] = 233; // blue
@@ -137,7 +143,7 @@ const ctxWF = canvasWF.getContext("2d"),imgObjWF = ctxWF.createImageData(canvasW
 const colMap = [[0,0,127,255],[0,0,131,255],[0,0,135,255],[0,0,139,255],[0,0,143,255],[0,0,147,255],[0,0,151,255],[0,0,155,255],[0,0,159,255],[0,0,163,255],[0,0,167,255],[0,0,171,255],[0,0,175,255],[0,0,179,255],[0,0,183,255],[0,0,187,255],[0,0,191,255],[0,0,195,255],[0,0,199,255],[0,0,203,255],[0,0,207,255],[0,0,211,255],[0,0,215,255],[0,0,219,255],[0,0,223,255],[0,0,227,255],[0,0,231,255],[0,0,235,255],[0,0,239,255],[0,0,243,255],[0,0,247,255],[0,0,251,255],[0,0,255,255],[0,4,255,255],[0,8,255,255],[0,12,255,255],[0,16,255,255],[0,20,255,255],[0,24,255,255],[0,28,255,255],[0,32,255,255],[0,36,255,255],[0,40,255,255],[0,44,255,255],[0,48,255,255],[0,52,255,255],[0,56,255,255],[0,60,255,255],[0,64,255,255],[0,68,255,255],[0,72,255,255],[0,76,255,255],[0,80,255,255],[0,84,255,255],[0,88,255,255],[0,92,255,255],[0,96,255,255],[0,100,255,255],[0,104,255,255],[0,108,255,255],[0,112,255,255],[0,116,255,255],[0,120,255,255],[0,124,255,255],[0,128,255,255],[0,132,255,255],[0,136,255,255],[0,140,255,255],[0,144,255,255],[0,148,255,255],[0,152,255,255],[0,156,255,255],[0,160,255,255],[0,164,255,255],[0,168,255,255],[0,172,255,255],[0,176,255,255],[0,180,255,255],[0,184,255,255],[0,188,255,255],[0,192,255,255],[0,196,255,255],[0,200,255,255],[0,204,255,255],[0,208,255,255],[0,212,255,255],[0,216,255,255],[0,220,255,255],[0,224,255,255],[0,228,255,255],[0,232,255,255],[0,236,255,255],[0,240,255,255],[0,244,255,255],[0,248,255,255],[0,252,255,255],[1,255,253,255],[5,255,249,255],[9,255,245,255],[13,255,241,255],[17,255,237,255],[21,255,233,255],[25,255,229,255],[29,255,225,255],[33,255,221,255],[37,255,217,255],[41,255,213,255],[45,255,209,255],[49,255,205,255],[53,255,201,255],[57,255,197,255],[61,255,193,255],[65,255,189,255],[69,255,185,255],[73,255,181,255],[77,255,177,255],[81,255,173,255],[85,255,169,255],[89,255,165,255],[93,255,161,255],[97,255,157,255],[101,255,153,255],[105,255,149,255],[109,255,145,255],[113,255,141,255],[117,255,137,255],[121,255,133,255],[125,255,129,255],[129,255,125,255],[133,255,121,255],[137,255,117,255],[141,255,113,255],[145,255,109,255],[149,255,105,255],[153,255,101,255],[157,255,97,255],[161,255,93,255],[165,255,89,255],[169,255,85,255],[173,255,81,255],[177,255,77,255],[181,255,73,255],[185,255,69,255],[189,255,65,255],[193,255,61,255],[197,255,57,255],[201,255,53,255],[205,255,49,255],[209,255,45,255],[213,255,41,255],[217,255,37,255],[221,255,33,255],[225,255,29,255],[229,255,25,255],[233,255,21,255],[237,255,17,255],[241,255,13,255],[245,255,9,255],[249,255,5,255],[253,255,1,255],[255,252,0,255],[255,248,0,255],[255,244,0,255],[255,240,0,255],[255,236,0,255],[255,232,0,255],[255,228,0,255],[255,224,0,255],[255,220,0,255],[255,216,0,255],[255,212,0,255],[255,208,0,255],[255,204,0,255],[255,200,0,255],[255,196,0,255],[255,192,0,255],[255,188,0,255],[255,184,0,255],[255,180,0,255],[255,176,0,255],[255,172,0,255],[255,168,0,255],[255,164,0,255],[255,160,0,255],[255,156,0,255],[255,152,0,255],[255,148,0,255],[255,144,0,255],[255,140,0,255],[255,136,0,255],[255,132,0,255],[255,128,0,255],[255,124,0,255],[255,120,0,255],[255,116,0,255],[255,112,0,255],[255,108,0,255],[255,104,0,255],[255,100,0,255],[255,96,0,255],[255,92,0,255],[255,88,0,255],[255,84,0,255],[255,80,0,255],[255,76,0,255],[255,72,0,255],[255,68,0,255],[255,64,0,255],[255,60,0,255],[255,56,0,255],[255,52,0,255],[255,48,0,255],[255,44,0,255],[255,40,0,255],[255,36,0,255],[255,32,0,255],[255,28,0,255],[255,24,0,255],[255,20,0,255],[255,16,0,255],[255,12,0,255],[255,8,0,255],[255,4,0,255],[255,0,0,255],[251,0,0,255],[247,0,0,255],[243,0,0,255],[239,0,0,255],[235,0,0,255],[231,0,0,255],[227,0,0,255],[223,0,0,255],[219,0,0,255],[215,0,0,255],[211,0,0,255],[207,0,0,255],[203,0,0,255],[199,0,0,255],[195,0,0,255],[191,0,0,255],[187,0,0,255],[183,0,0,255],[179,0,0,255],[175,0,0,255],[171,0,0,255],[167,0,0,255],[163,0,0,255],[159,0,0,255],[155,0,0,255],[151,0,0,255],[147,0,0,255],[143,0,0,255],[139,0,0,255],[135,0,0,255],[131,0,0,255],[127,0,0,255]];
 const midle_WF = canvas_width_WF*2;
 
-function SetImageDataWF(datas) {
+function SetImageDataWF(datas,scale_min,scale_max) {
 	var canvasBuffer = document.createElement("canvas");
 	canvasBuffer.width = canvas_width_WF;
 	canvasBuffer.height = canvas_height_WF;
@@ -154,11 +160,16 @@ function SetImageDataWF(datas) {
     for (px = 0; px < canvas_width_WF; px++) {
 		i = 4*px;
 
+		let dat = Math.floor(datas[px]*scale_max + scale_min);
+		
+		if(dat<0){dat=0;}
+		if(dat>255){dat=255;}
+		
 		// let rgba = colMap[datas[px]];  // lookup color rgba values
-		imgObjWF.data[i] = colMap[datas[px]][0];   // red
-		imgObjWF.data[i+1] = colMap[datas[px]][1]; // green
-		imgObjWF.data[i+2] = colMap[datas[px]][2]; // blue
-		imgObjWF.data[i+3] = colMap[datas[px]][3]; // alpha
+		imgObjWF.data[i] = colMap[dat][0];   // red
+		imgObjWF.data[i+1] = colMap[dat][1]; // green
+		imgObjWF.data[i+2] = colMap[dat][2]; // blue
+		imgObjWF.data[i+3] = colMap[dat][3]; // alpha
 	}
 	
 	imgObjWF.data[midle_WF] = 0;   
@@ -196,8 +207,8 @@ function showOnmouseInfo(event) {
 		var rect = this.getBoundingClientRect()
 		var scaleX = this.width / rect.width;    // relationship bitmap vs. element for X 
 		var hzperpixel=samplerate/this.width;
-		console.log(this.width);
-		console.log(rect.width);
+		// console.log(this.width);
+		// console.log(rect.width);
 		
 		hz=((window.scrollX+event.clientX)*scaleX*hzperpixel)-(samplerate/2);
 		freqmouse=window.opener.TRXfrequency+hz;

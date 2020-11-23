@@ -19,7 +19,7 @@ News:<br>
 <br><br><br>
 
 
-![alt text](README/UHRR_Pict.png)
+![UHRR_Pict](https://user-images.githubusercontent.com/18350938/99989724-e1263580-2daa-11eb-9e3e-c132d4c2d7eb.png)
 
 This utility is used to set up an amateur radio station remotely via a web browser.
 
@@ -34,9 +34,9 @@ You can configure all of this by logging into https://UHRR.local:8888/CONFIG
 If the original configuration is invalid or missing, this will automatically switch to the configuration page.
 
 
-![alt text](README/func_princ.png)
+![func_princ](https://user-images.githubusercontent.com/18350938/99989800-f3a06f00-2daa-11eb-9b45-d695b75904f7.png)
 
-![alt text](README/sound_diagram.png)
+![sound_diagram](https://user-images.githubusercontent.com/18350938/99989819-fe5b0400-2daa-11eb-884f-c09341a03541.png)
 
 Special thanks to :
 

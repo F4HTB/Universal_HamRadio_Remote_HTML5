@@ -52,10 +52,12 @@ try:
 	nbBuffer=24
 	nbsamples=nbBuffer/2*FFTSIZE
 	ptime=nbsamples/int(config['PANADAPTER']['sample_rate'])
+	sdr_windows = eval("np."+config['PANADAPTER']['fft_window']+ "(FFTSIZE)") 
+	fftpaquetlen=int(FFTSIZE*8/2048)
 except:
 	is_rtlsdr_present = False
 	
-sdr_windows = eval("np."+config['PANADAPTER']['fft_window']+ "(FFTSIZE)") 
+
 	
 AudioPanaHandlerClients = []
 
@@ -165,7 +167,7 @@ class loadFFTdata(threading.Thread):
 		ret=int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
 		return ret
 
-fftpaquetlen=int(FFTSIZE*8/2048)
+
 
 class WS_panFFTHandler(tornado.websocket.WebSocketHandler):
 

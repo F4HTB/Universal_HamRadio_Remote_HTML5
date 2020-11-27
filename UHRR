@@ -55,6 +55,8 @@ try:
 except:
 	is_rtlsdr_present = False
 	
+sdr_windows = eval("np."+config['PANADAPTER']['fft_window']+ "(FFTSIZE)") 
+	
 AudioPanaHandlerClients = []
 
 class loadFFTdata(threading.Thread):
@@ -96,7 +98,7 @@ class loadFFTdata(threading.Thread):
 			for ic in range(nbBuffer-1):
 				start=ic * int(FFTSIZE/2)
 				end=start+FFTSIZE
-				td_segment = data[start:end]
+				td_segment = data[start:end]*sdr_windows
 
 				# remove the 0hz spike
 				td_segment = np.subtract(td_segment, np.average(td_segment))
@@ -615,7 +617,16 @@ class ConfigHandler(BaseHandler):
 		self.write("""PANADAPTER frequency correction (ppm):<input type="text" name="PANADAPTER.freq_correction" value="""+config['PANADAPTER']['freq_correction']+"""><br/><br/>""")
 
 		self.write("""PANADAPTER initial gain:<input type="text" name="PANADAPTER.gain" value="""+config['PANADAPTER']['gain']+"""><br/><br/>""")
-				
+		
+		self.write("""PANADAPTER windowing:<select name="PANADAPTER.fft_window">""")
+		if(config['PANADAPTER']['fft_window']!="null"):
+			self.write("""<option value="""+config['PANADAPTER']['fft_window']+""" selected>"""+config['PANADAPTER']['fft_window']+"""</option>""")
+		self.write("""<option value="bartlett">bartlett</option>""")
+		self.write("""<option value="blackman">blackman</option>""")
+		self.write("""<option value="hamming">hamming</option>""")
+		self.write("""<option value="hanning">hanning</option>""")
+		self.write("""</select><br/><br/>""")
+		
 		self.write("""<input type="submit" value="Save & Restart server"><br/><br/></form>Possible problem:"""+e+"""</html>""")
 		
 	def post(self):

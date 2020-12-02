@@ -11,9 +11,9 @@ Use only if it is legal in your country.<br>
 It is intended for remote use, it is not designed for use on the same computer as an interface even though it will likely work.<br>
 Please don't raise an issue for anything outside of the intended design.<br>
 <br><br><br>
-<b>More info on the wiki page:</b>https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
-<br><br><br>
-<b>News:</b>https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki/History<br>
+<b>More info on the wiki page:</b> https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
+<br><br>
+<b>News:</b> https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki/History<br>
 <br><br><br>
 
 ![UHRR_Pict](https://user-images.githubusercontent.com/18350938/99989724-e1263580-2daa-11eb-9e3e-c132d4c2d7eb.png)

@@ -340,6 +340,18 @@ class TRXRIG:
 			self.rig_pathname = config['HAMLIB']['rig_pathname']
 			self.rig = Hamlib.Rig(Hamlib.__dict__[self.rig_model])  # Look up the model's numerical index in Hamlib's symbol dictionary.
 			self.rig.set_conf("rig_pathname", self.rig_pathname)
+			if(config['HAMLIB']['data_bits']!=""): 
+				self.rig.set_conf("data_bits", str(config['HAMLIB']['data_bits'])) #8 as default
+			if(config['HAMLIB']['stop_bits']!=""):
+				self.rig.set_conf("stop_bits", str(config['HAMLIB']['stop_bits'])) #2 as default
+			if(config['HAMLIB']['serial_parity']!=""):
+				self.rig.set_conf("serial_parity", str(config['HAMLIB']['serial_parity']))# None as default NONE ODD EVEN MARK SPACE
+			if(config['HAMLIB']['serial_handshake']!=""):
+				self.rig.set_conf("serial_handshake", str(config['HAMLIB']['serial_handshake'])) # None as default NONE XONXOFF HARDWARE 
+			if(config['HAMLIB']['dtr_state']!=""):
+				self.rig.set_conf("dtr_state", str(config['HAMLIB']['dtr_state'])) #ON or OFF
+			if(config['HAMLIB']['rts_state']!=""):
+				self.rig.set_conf("rts_state", str(config['HAMLIB']['rts_state'])) #ON or OFF
 			self.rig.set_conf("retry", config['HAMLIB']['retry'])
 			self.rig.open()
 		except:
@@ -547,14 +559,14 @@ class ConfigHandler(BaseHandler):
 
 		self.write("""[AUDIO]<br/><br/>""")
 		self.write("""AUDIO outputdevice:<select name="AUDIO.outputdevice">""")
-		if(config['AUDIO']['outputdevice']!="null"):
+		if(config['AUDIO']['outputdevice']!=""):
 			self.write("""<option value="""+config['AUDIO']['outputdevice']+""" selected>"""+config['AUDIO']['outputdevice']+"""</option>""")
 		for c in audiodevicesoutput:
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
 		self.write("""</select> Output from audio soundcard to the mic input of TRX.<br/><br/>""")
 		
 		self.write("""AUDIO inputdevice:<select name="AUDIO.inputdevice">""")
-		if(config['AUDIO']['inputdevice']!="null"):
+		if(config['AUDIO']['inputdevice']!=""):
 			self.write("""<option value="""+config['AUDIO']['inputdevice']+""" selected>"""+config['AUDIO']['inputdevice']+"""</option>""")
 		for c in audiodevicesinput:
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
@@ -563,21 +575,21 @@ class ConfigHandler(BaseHandler):
 		self.write("""[HAMLIB]<br/><br/>""")
 	
 		self.write("""HAMLIB radio model:<select name="HAMLIB.rig_model">""")
-		if(config['HAMLIB']['rig_model']!="null"):
+		if(config['HAMLIB']['rig_model']!=""):
 			self.write("""<option value="""+config['HAMLIB']['rig_model']+""" selected>"""+config['HAMLIB']['rig_model']+"""</option>""")
 		for c in rig_models:
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
 		self.write("""</select> Hamlib trx model.<br/><br/>""")
 		
 		self.write("""HAMLIB serial port:<select name="HAMLIB.rig_pathname">""")
-		if(config['HAMLIB']['rig_pathname']!="null"):
+		if(config['HAMLIB']['rig_pathname']!=""):
 			self.write("""<option value="""+config['HAMLIB']['rig_pathname']+""" selected>"""+config['HAMLIB']['rig_pathname']+"""</option>""")
 		for c in comports:
 			self.write("""<option value="""+str(c.device)+""">"""+str(c.device)+"""</option>""")
 		self.write("""</select> Serial port of the CAT interface.<br/><br/>""")
 		
 		self.write("""HAMLIB radio rate:<select name="HAMLIB.rig_rate">""")
-		if(config['HAMLIB']['rig_rate']!="null"):
+		if(config['HAMLIB']['rig_rate']!=""):
 			self.write("""<option value="""+config['HAMLIB']['rig_rate']+""" selected>"""+config['HAMLIB']['rig_rate']+"""</option>""")
 		self.write("""<option value=230400>230400</option>""")
 		self.write("""<option value=115200>115200</option>""")
@@ -594,17 +606,63 @@ class ConfigHandler(BaseHandler):
 		self.write("""</select> Serial port baud rate.<br/><br/>""")
 		
 		self.write("""HAMLIB auto tx poweroff:<select name="HAMLIB.trxautopower">""")
-		if(config['HAMLIB']['trxautopower']!="null"):
+		if(config['HAMLIB']['trxautopower']!=""):
 			self.write("""<option value="""+config['HAMLIB']['trxautopower']+""" selected>"""+config['HAMLIB']['trxautopower']+"""</option>""")
 		self.write("""<option value=\"True\">True</option>""")
 		self.write("""<option value=\"False\">False</option>""")
 		self.write("""</select> Set to auto power off the trx when it's not in use<br/><br/>""")
 
+		CDVALUE=""
+		if(config['HAMLIB']['data_bits']!=""):
+			CDVALUE=config['HAMLIB']['data_bits']
+		self.write("""HAMLIB serial data bits:<input type="text" name="HAMLIB.data_bits" value="""+CDVALUE+"""> Leave blank to use the HAMIB default value.<br/><br/>""")
+		
+		CDVALUE=""
+		if(config['HAMLIB']['stop_bits']!=""):
+			CDVALUE=config['HAMLIB']['stop_bits']
+		self.write("""HAMLIB serial stop bits:<input type="text" name="HAMLIB.stop_bits" value="""+CDVALUE+"""> Leave blank to use the HAMIB default value.<br/><br/>""")
+
+		self.write("""HAMLIB serial parity:<select name="HAMLIB.serial_parity">""")
+		if(config['HAMLIB']['serial_parity']!=""):
+			self.write("""<option value="""+config['HAMLIB']['serial_parity']+""" selected>"""+config['HAMLIB']['serial_parity']+"""</option>""")
+		self.write("""<option value=\"\"></option>""")
+		self.write("""<option value=\"NONE\">NONE</option>""")
+		self.write("""<option value=\"ODD\">ODD</option>""")
+		self.write("""<option value=\"ODD\">EVEN</option>""")
+		self.write("""<option value=\"ODD\">MARK</option>""")
+		self.write("""<option value=\"ODD\">SPACE</option>""")
+		self.write("""</select> Leave blank to use the HAMIB default value.<br/><br/>""")
+
+		self.write("""HAMLIB serial handshake:<select name="HAMLIB.serial_handshake">""")
+		if(config['HAMLIB']['serial_handshake']!=""):
+			self.write("""<option value="""+config['HAMLIB']['serial_handshake']+""" selected>"""+config['HAMLIB']['serial_handshake']+"""</option>""")
+		self.write("""<option value=\"\"></option>""")
+		self.write("""<option value=\"NONE\">NONE</option>""")
+		self.write("""<option value=\"XONXOFF\">XONXOFF</option>""")
+		self.write("""<option value=\"HARDWARE\">HARDWARE</option>""")
+		self.write("""</select> Leave blank to use the HAMIB default value.<br/><br/>""")
+
+		self.write("""HAMLIB dtr state:<select name="HAMLIB.dtr_state">""")
+		if(config['HAMLIB']['dtr_state']!=""):
+			self.write("""<option value="""+config['HAMLIB']['dtr_state']+""" selected>"""+config['HAMLIB']['dtr_state']+"""</option>""")
+		self.write("""<option value=\"\"></option>""")
+		self.write("""<option value=\"ON\">ON</option>""")
+		self.write("""<option value=\"OFF\">OFF</option>""")
+		self.write("""</select> Leave blank to use the HAMIB default value.<br/><br/>""")
+
+		self.write("""HAMLIB rts state:<select name="HAMLIB.rts_state">""")
+		if(config['HAMLIB']['rts_state']!=""):
+			self.write("""<option value="""+config['HAMLIB']['rts_state']+""" selected>"""+config['HAMLIB']['rts_state']+"""</option>""")
+		self.write("""<option value=\"\"></option>""")
+		self.write("""<option value=\"ON\">ON</option>""")
+		self.write("""<option value=\"OFF\">OFF</option>""")
+		self.write("""</select> Leave blank to use the HAMIB default value.<br/><br/>""")
+
 		self.write("""[PANADAPTER]<br/><br/>""")
 		self.write("""PANADAPTER FI frequency (hz):<input type="text" name="PANADAPTER.center_freq" value="""+config['PANADAPTER']['center_freq']+"""><br/><br/>""")
 		
 		self.write("""HAMLIB radio rate (samples/s):<select name="PANADAPTER.sample_rate">""")
-		if(config['PANADAPTER']['sample_rate']!="null"):
+		if(config['PANADAPTER']['sample_rate']!=""):
 			self.write("""<option value="""+config['PANADAPTER']['sample_rate']+""" selected>"""+config['PANADAPTER']['sample_rate']+"""</option>""")
 		self.write("""<option value=3200000>3200000</option>""")
 		self.write("""<option value=2880000>2880000</option>""")
@@ -621,7 +679,7 @@ class ConfigHandler(BaseHandler):
 		self.write("""PANADAPTER initial gain:<input type="text" name="PANADAPTER.gain" value="""+config['PANADAPTER']['gain']+"""><br/><br/>""")
 		
 		self.write("""PANADAPTER windowing:<select name="PANADAPTER.fft_window">""")
-		if(config['PANADAPTER']['fft_window']!="null"):
+		if(config['PANADAPTER']['fft_window']!=""):
 			self.write("""<option value="""+config['PANADAPTER']['fft_window']+""" selected>"""+config['PANADAPTER']['fft_window']+"""</option>""")
 		self.write("""<option value="bartlett">bartlett</option>""")
 		self.write("""<option value="blackman">blackman</option>""")

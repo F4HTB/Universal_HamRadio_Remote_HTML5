@@ -5,11 +5,11 @@ You can use basic and some advanced functions of your radio.
 You use the speaker and microphone of your computer to communicate.  
 This project is more oriented for voice (phone) or CW.  
   
-Please send me an email with your success story. olivier@f4htb.fr
+<b>Please send me an email with your success story.</b> olivier@f4htb.fr
 
 <b>More info on the wiki page:</b> https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
    
-<b>News:</b>https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki/History<br>
+<b>News:</b> https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki/History<br>
   
 Caution:  
 It is designed for Raspberry Pi OS (32-bit) Lite (actually "Minimal image based on Debian Buster").  

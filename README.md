@@ -5,20 +5,19 @@ You can use basic and some advanced functions of your radio.
 You use the speaker and microphone of your computer to communicate.  
 This project is more oriented for voice (phone) or CW.  
   
+Please send me an email with your success story. olivier@f4htb.fr
+
+<b>More info on the wiki page:</b> https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
+   
+<b>News:</b>https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki/History<br>
+  
 Caution:  
 It is designed for Raspberry Pi OS (32-bit) Lite (actually "Minimal image based on Debian Buster").  
 Use only if it is legal in your country.  
 It is intended for remote use, it is not designed for use on the same computer as an interface even though it will likely work.  
 Please don't raise an issue for anything outside of the intended design.  
-      
-<b>More info on the wiki page:</b>https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
-      
-News:  
--Add panadapter based on the output FI of the radio and a RTLSDR key  
--Add authantification mecanisme  
-      
-
-
+  
+  
 ![UHRR_Pict](https://user-images.githubusercontent.com/18350938/99989724-e1263580-2daa-11eb-9e3e-c132d4c2d7eb.png)
 
 This utility is used to set up an amateur radio station remotely via a web browser.

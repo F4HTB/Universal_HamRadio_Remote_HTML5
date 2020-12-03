@@ -11,6 +11,7 @@ Use only if it is legal in your country.<br>
 It is intended for remote use, it is not designed for use on the same computer as an interface even though it will likely work.<br>
 Please don't raise an issue for anything outside of the intended design.<br>
 <br><br><br>
+Please send me an email with your success story.  
 <b>More info on the wiki page:</b> https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki
 <br><br>
 <b>News:</b> https://github.com/F4HTB/Universal_HamRadio_Remote_HTML5/wiki/History<br>

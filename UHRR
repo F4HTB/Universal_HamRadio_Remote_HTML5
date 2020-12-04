@@ -626,20 +626,20 @@ class ConfigHandler(BaseHandler):
 		if(config['HAMLIB']['serial_parity']!=""):
 			self.write("""<option value="""+config['HAMLIB']['serial_parity']+""" selected>"""+config['HAMLIB']['serial_parity']+"""</option>""")
 		self.write("""<option value=\"\"></option>""")
-		self.write("""<option value=\"NONE\">NONE</option>""")
-		self.write("""<option value=\"ODD\">ODD</option>""")
-		self.write("""<option value=\"ODD\">EVEN</option>""")
-		self.write("""<option value=\"ODD\">MARK</option>""")
-		self.write("""<option value=\"ODD\">SPACE</option>""")
+		self.write("""<option value=\"None\">None</option>""")
+		self.write("""<option value=\"Odd\">Odd</option>""")
+		self.write("""<option value=\"Even\">Even</option>""")
+		self.write("""<option value=\"Mark\">Mark</option>""")
+		self.write("""<option value=\"Space\">Space</option>""")
 		self.write("""</select> Leave blank to use the HAMIB default value.<br/><br/>""")
 
 		self.write("""HAMLIB serial handshake:<select name="HAMLIB.serial_handshake">""")
 		if(config['HAMLIB']['serial_handshake']!=""):
 			self.write("""<option value="""+config['HAMLIB']['serial_handshake']+""" selected>"""+config['HAMLIB']['serial_handshake']+"""</option>""")
 		self.write("""<option value=\"\"></option>""")
-		self.write("""<option value=\"NONE\">NONE</option>""")
+		self.write("""<option value=\"None\">None</option>""")
 		self.write("""<option value=\"XONXOFF\">XONXOFF</option>""")
-		self.write("""<option value=\"HARDWARE\">HARDWARE</option>""")
+		self.write("""<option value=\"Hardware\">Hardware</option>""")
 		self.write("""</select> Leave blank to use the HAMIB default value.<br/><br/>""")
 
 		self.write("""HAMLIB dtr state:<select name="HAMLIB.dtr_state">""")

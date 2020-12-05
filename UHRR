@@ -239,6 +239,7 @@ class WS_AudioRXHandler(tornado.websocket.WebSocketHandler):
 		print('new connection on AudioRXHandler socket.')
 		flagWavstart = True
 		self.tailstream()
+		self.set_nodelay(True)
 		
 	@tornado.gen.coroutine
 	def tailstream(self):
@@ -293,6 +294,7 @@ class WS_AudioTXHandler(tornado.websocket.WebSocketHandler):
 			print('new connection on AudioTXHandler socket.')
 		last_AudioTXHandler_msg_time=time.time()
 		self.stoppttontimeout()
+		self.set_nodelay(True)
 
 	def on_message(self, data) :
 		global last_AudioTXHandler_msg_time
@@ -481,6 +483,7 @@ class WS_ControlTRX(tornado.websocket.WebSocketHandler):
 		print('new connection on ControlTRX socket.')
 		if(is_rtlsdr_present):
 			self.write_message("panfft")
+		self.set_nodelay(True)
 		
 	@tornado.gen.coroutine
 	def on_message(self, data) :

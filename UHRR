@@ -342,6 +342,8 @@ class TRXRIG:
 			self.rig_pathname = config['HAMLIB']['rig_pathname']
 			self.rig = Hamlib.Rig(Hamlib.__dict__[self.rig_model])  # Look up the model's numerical index in Hamlib's symbol dictionary.
 			self.rig.set_conf("rig_pathname", self.rig_pathname)
+			if(config['HAMLIB']['rig_rate']!=""):
+				self.rig.set_conf("serial_speed", str(config['HAMLIB']['rig_rate']))
 			if(config['HAMLIB']['data_bits']!=""): 
 				self.rig.set_conf("data_bits", str(config['HAMLIB']['data_bits'])) #8 as default
 			if(config['HAMLIB']['stop_bits']!=""):

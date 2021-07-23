@@ -744,7 +744,7 @@ class AuthLoginHandler(BaseHandler):
 				f = open(config['SERVER']['db_users_file'], "r") 
 				for x in f:
 					if x[0]!="#":
-						db=x.split(" ")
+						db=x.strip('\n').split(" ")
 						if db[0] == user and db[1]== password:
 							retval = True
 							break		

@@ -1,0 +1,10 @@
+services:
+  uhrh:
+    build: .
+    container_name: uhrh
+    restart: always
+    devices:
+      - /dev/snd:/dev/snd
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    ports:
+      - 8888:8888

@@ -334,32 +334,44 @@ class TRXRIG:
 		self.infos = {}
 		self.infos["PTT"]=False
 		self.infos["powerstat"]=False
-		self.serialport = Hamlib.hamlib_port_parm_serial
-		self.serialport.rate=config['HAMLIB']['rig_rate']
-		try:
-			Hamlib.rig_set_debug(Hamlib.RIG_DEBUG_NONE)
-			self.rig_model = "RIG_MODEL_"+str(config['HAMLIB']['rig_model'])
-			self.rig_pathname = config['HAMLIB']['rig_pathname']
-			self.rig = Hamlib.Rig(Hamlib.__dict__[self.rig_model])  # Look up the model's numerical index in Hamlib's symbol dictionary.
-			self.rig.set_conf("rig_pathname", self.rig_pathname)
-			if(config['HAMLIB']['rig_rate']!=""):
-				self.rig.set_conf("serial_speed", str(config['HAMLIB']['rig_rate']))
-			if(config['HAMLIB']['data_bits']!=""): 
-				self.rig.set_conf("data_bits", str(config['HAMLIB']['data_bits'])) #8 as default
-			if(config['HAMLIB']['stop_bits']!=""):
-				self.rig.set_conf("stop_bits", str(config['HAMLIB']['stop_bits'])) #2 as default
-			if(config['HAMLIB']['serial_parity']!=""):
-				self.rig.set_conf("serial_parity", str(config['HAMLIB']['serial_parity']))# None as default NONE ODD EVEN MARK SPACE
-			if(config['HAMLIB']['serial_handshake']!=""):
-				self.rig.set_conf("serial_handshake", str(config['HAMLIB']['serial_handshake'])) # None as default NONE XONXOFF HARDWARE 
-			if(config['HAMLIB']['dtr_state']!=""):
-				self.rig.set_conf("dtr_state", str(config['HAMLIB']['dtr_state'])) #ON or OFF
-			if(config['HAMLIB']['rts_state']!=""):
-				self.rig.set_conf("rts_state", str(config['HAMLIB']['rts_state'])) #ON or OFF
-			self.rig.set_conf("retry", config['HAMLIB']['retry'])
-			self.rig.open()
-		except:
-			print("Could not open a communication channel to the rig via Hamlib!")
+		# Setup for direct serial use
+		if (config['HAMLIB']['rig_connection']=="serial"): 
+			self.serialport = Hamlib.hamlib_port_parm_serial
+			self.serialport.rate=config['HAMLIB']['rig_rate']
+			try:
+				Hamlib.rig_set_debug(Hamlib.RIG_DEBUG_NONE)
+				self.rig_model = "RIG_MODEL_"+str(config['HAMLIB']['rig_model'])
+				self.rig_pathname = config['HAMLIB']['rig_pathname']
+				self.rig = Hamlib.Rig(Hamlib.__dict__[self.rig_model])  # Look up the model's numerical index in Hamlib's symbol dictionary.
+				self.rig.set_conf("rig_pathname", self.rig_pathname)
+				if(config['HAMLIB']['rig_rate']!=""):
+					self.rig.set_conf("serial_speed", str(config['HAMLIB']['rig_rate']))
+				if(config['HAMLIB']['data_bits']!=""): 
+					self.rig.set_conf("data_bits", str(config['HAMLIB']['data_bits'])) #8 as default
+				if(config['HAMLIB']['stop_bits']!=""):
+					self.rig.set_conf("stop_bits", str(config['HAMLIB']['stop_bits'])) #2 as default
+				if(config['HAMLIB']['serial_parity']!=""):
+					self.rig.set_conf("serial_parity", str(config['HAMLIB']['serial_parity']))# None as default NONE ODD EVEN MARK SPACE
+				if(config['HAMLIB']['serial_handshake']!=""):
+					self.rig.set_conf("serial_handshake", str(config['HAMLIB']['serial_handshake'])) # None as default NONE XONXOFF HARDWARE 
+				if(config['HAMLIB']['dtr_state']!=""):
+					self.rig.set_conf("dtr_state", str(config['HAMLIB']['dtr_state'])) #ON or OFF
+				if(config['HAMLIB']['rts_state']!=""):
+					self.rig.set_conf("rts_state", str(config['HAMLIB']['rts_state'])) #ON or OFF
+				self.rig.set_conf("retry", config['HAMLIB']['retry'])
+
+				self.rig.open()
+			except:
+				print("Could not open a serial communication channel to the rig via Hamlib!")
+		# Setup for NETRIGCTL use
+		if (config['HAMLIB']['rig_connection']=="net"):
+			try:
+				self.rig = Hamlib.Rig(2)
+				self.rig.set_conf("rig_pathname", config['HAMLIB']['rig_rigctld_path'])
+				self.rig.set_conf("retry", config['HAMLIB']['retry']) 
+				self.rig.open()
+			except:
+				print("Could not open a NET communication channel to the rig via Hamlib!")
 		
 		self.setPower(1)
 		self.getvfo()
@@ -578,6 +590,11 @@ class ConfigHandler(BaseHandler):
 		self.write("""</select> Input from audio soundcard from the speaker output of TRX.<br/><br/>""")
 
 		self.write("""[HAMLIB]<br/><br/>""")
+		self.write("""HAMLIB connection method:<select name="HAMLIB.rig_connection">""")
+		self.write("""<option value="""+config['HAMLIB']['rig_connection']+""" selected>"""+config['HAMLIB']['rig_connection']+"""</option>""")
+		self.write("""<option value=serial>net</option>""")
+		self.write("""<option value=net>serial</option>""")
+		self.write("""</select> Choose "net" for a NETRIGCTL radio or "serial" for an exclusive directly connected rig.<br/><br/>""")
 	
 		self.write("""HAMLIB radio model:<select name="HAMLIB.rig_model">""")
 		if(config['HAMLIB']['rig_model']!=""):
@@ -585,7 +602,11 @@ class ConfigHandler(BaseHandler):
 		for c in rig_models:
 			self.write("""<option value="""+c+""">"""+c+"""</option>""")
 		self.write("""</select> Hamlib trx model.<br/><br/>""")
-		
+
+		CDVALUE=""
+		if(config['HAMLIB']['rig_rigctld_path']!=""):
+			CDVALUE=config['HAMLIB']['rig_rigctld_path']
+		self.write("""HAMLIB NETRIGCTL Server:<input type="text" name="HAMLIB.rig_rigctld_path" value="""+CDVALUE+"""> Use IP.ip.IP.ip:PORT format ex. 192.168.1.1:4533<br/><br/>""")
 		self.write("""HAMLIB serial port:<select name="HAMLIB.rig_pathname">""")
 		if(config['HAMLIB']['rig_pathname']!=""):
 			self.write("""<option value="""+config['HAMLIB']['rig_pathname']+""" selected>"""+config['HAMLIB']['rig_pathname']+"""</option>""")
